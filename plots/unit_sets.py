@@ -17,8 +17,9 @@ def model_stats(condition):
     return s[s.condition == condition].set_index('set').loc[SETS]
 
 
-def panels(axs, ses, models, tops, span=(0.45, 0.45), fitted_dx=0.0, letter_y=1.02):
-    """axs: 6 axes; models: list of (stats table, marker, x offset, colour or {'on': c, 'off': c})."""
+def panels(axs, ses, models, tops, span=(0.45, 0.45), fitted_dx=0.0, letter_y=1.02, mew=0):
+    """axs: 6 axes; models: list of (stats table, marker, x offset, colour or {'on': c, 'off': c}); mew: marker edge
+    width of the models (None: matplotlib's default)."""
     x = np.arange(len(SETS))
     jit = np.random.default_rng(0).uniform(-0.18, 0.18, 25)
     for k, (a, (dk, mk, name, state)) in enumerate(zip(axs, PANELS)):
@@ -30,7 +31,7 @@ def panels(axs, ses, models, tops, span=(0.45, 0.45), fitted_dx=0.0, letter_y=1.
         a.errorbar(x, [s.mean() for s in v], yerr=[2 * s.std(ddof=1) / np.sqrt(len(s)) for s in v], fmt='o', ms=3,
                    color=INK, elinewidth=0.6, capsize=0, zorder=3)
         for st, marker, dx, col in models:
-            a.plot(x + dx, st[mk].values, marker, ms=3, color=col[state] if isinstance(col, dict) else col, mew=0, zorder=2)
+            a.plot(x + dx, st[mk].values, marker, ms=3, color=col[state] if isinstance(col, dict) else col, mew=mew, zorder=2)
         a.axvline(2.5, color=GREY, ls=(0, (3, 2)), lw=0.5); a.axvline(5.5, color=GREY, ls=(0, (3, 2)), lw=0.5)
         a.set_xlim(-0.6, len(SETS) - 0.4)
         a.set_xticks(x); a.set_xticklabels(SETS, rotation=60, ha='right', rotation_mode='anchor', fontsize=7)
