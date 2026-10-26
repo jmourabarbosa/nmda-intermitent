@@ -18,6 +18,14 @@ stated below (checks in the final section).
    what the current fit code computes (9.43 and 9.05). The published parameters therefore come from an earlier
    version of the loss or of the data table, and a refit with the current code will not return them.
    Also: the NMDA seed used (run0, loss 8.99) was not the best of the archived runs (run1, 8.78).
+   Refits with the current code (`fit.fit`, 1,000 evaluations, seeds 0-2; best parameters not committed):
+   - NMDA: losses 9.25, 9.48 and 9.10 (seeds 0-2), against 9.43 for the published parameters, so the published fit is
+     close to but not at the optimum of the current loss. The best refit (seed 2) has tau_N 150 ms and w_s 1.30 (both
+     at their bounds, as published), dips 9.1/s, 106 ms long, depth 0.81 (published: 10.2/s, 90 ms, 0.60).
+   - STP: seed 0 reaches 8.96 (w_s 0.69, dips 4.7/s, 260 ms, depth 0.32; published, from the archived seed 0: 0.69,
+     5.5/s, 212 ms, 0.39). Seeds 1 and 2 (stopped by a container restart after ~550 evaluations) had already found
+     exactly the archived best parameters of their seeds, so the STP fit code reproduces those runs, but not seed 0.
+   The figures use the published parameters (`ratemodel.FIT`).
 3. **Figure 3b caption.** The p values in the caption for Off length (7×10⁻⁵) and number of Off states (0.89) are
    those of the GLMM with a time-in-session covariate (`time_covariate_check.csv`, `time_terms = t`); the plotted
    effects and stars come from the model without it, which gives p = 1.1×10⁻⁴ and 0.78 (total Off and On time agree).
