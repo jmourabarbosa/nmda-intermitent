@@ -65,7 +65,13 @@ def example_trial(nmda):
 def readout_example(nmda, ses):
     """Fig. S1a: one model trial through the read-out; S1c, d: the model's delay z at the fitted gain, and its
     decoding strength as a function of the gain."""
-    c, rho = nmda['sets']['all']['gain'], R.RHO['all']
+    rho, delay = R.RHO['all'], lambda tz: (tz >= 500) & (tz <= 1400)
+    # gain as calibrated for this figure originally: 1,056 trials (seed 11), 15-point grid (BUGS.md, B5)
+    dw0, tz0 = R.rate_diff(RM.simulate(RM.params(), 1056, seed=11))
+    rng = np.random.default_rng(1)
+    eta0 = R.noise(dw0.shape, rho, rng)
+    grid15 = 10 ** np.linspace(-2.6, -0.3, 15)
+    c = R.gain_for(ses['all']['mu_on'].mean(), R.gain_curve(dw0, eta0, delay(tz0), rng, grid15), grid15)
     sim = RM.simulate(RM.params(), 30, seed=5)
     dw, tz = R.rate_diff(sim)
     rng = np.random.default_rng(4)
@@ -75,7 +81,7 @@ def readout_example(nmda, ses):
     k = int(np.argmax([(s[valid] == -1).sum() * (s[valid] == 1).sum() for s in st]))     # a trial with both states
     simL = RM.simulate(RM.params(), 600, seed=21)
     dwL, tzL = R.rate_diff(simL)
-    dl = (tzL >= 500) & (tzL <= 1400)
+    dl = delay(tzL)
     etaL = R.noise(dwL.shape, rho, np.random.default_rng(22))
     grid = 10 ** np.linspace(-2.6, -0.6, 14)
     zm = (c * dwL + etaL)[:, dl].ravel()
