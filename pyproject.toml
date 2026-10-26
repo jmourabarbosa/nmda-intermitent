@@ -1,0 +1,9 @@
+[project]
+name = "nmdaint"
+version = "1.0"
+description = "Intermittent rate coding without short-term plasticity: analysis, models and figures"
+requires-python = ">=3.11"
+dependencies = ["numpy", "scipy", "numba", "pandas", "matplotlib", "scikit-learn", "joblib", "cma", "jupyter"]
+
+[tool.setuptools]
+packages = ["nmdaint", "plots"]
