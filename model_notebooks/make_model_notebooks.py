@@ -1,4 +1,4 @@
-"""Writes the two model notebooks (python notebooks/make_model_notebooks.py)."""
+"""Writes the two model notebooks (python model_notebooks/make_model_notebooks.py)."""
 import os
 
 import nbformat as nbf

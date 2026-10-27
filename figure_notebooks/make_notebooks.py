@@ -1,5 +1,5 @@
-"""Writes the figure notebooks (python notebooks/make_notebooks.py; then run them with
-jupyter nbconvert --to notebook --execute --inplace notebooks/fig*.ipynb)."""
+"""Writes the figure notebooks (python figure_notebooks/make_notebooks.py; then run them with
+jupyter nbconvert --to notebook --execute --inplace figure_notebooks/fig*.ipynb)."""
 import os
 
 import nbformat as nbf

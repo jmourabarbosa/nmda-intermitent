@@ -11,7 +11,8 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 | `scripts/` | pipelines that run the methods and write `results/` |
 | `results/` | precomputed results, small text and `.npz` files, read by the figures |
 | `plots/` | plotting code, one module per figure (`style.py`: shared style) |
-| `notebooks/` | one notebook per figure: loads `results/`, draws the figure (`figures/`), prints the numbers quoted in the text; `rate_model.ipynb` and `spiking_network.ipynb`: example simulations to play with the two models (under a minute each) |
+| `figure_notebooks/` | one notebook per figure: loads `results/`, draws the figure (`figures/`), prints the numbers quoted in the text |
+| `model_notebooks/` | `rate_model.ipynb`, `spiking_network.ipynb`: example simulations to play with the two models (under a minute each) |
 
 ### Methods (`nmdaint/`)
 
@@ -32,7 +33,7 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 
 ### Figures
 
-| figure | notebook | results from |
+| figure | notebook (`figure_notebooks/`) | results from |
 |---|---|---|
 | 1 | `fig1.ipynb` | `scripts/ratemodel.py` |
 | 2 | `fig2.ipynb` | `scripts/recordings.py`, `scripts/ratemodel.py` |
@@ -53,7 +54,7 @@ python scripts/ratemodel.py         # ~1 h; --fit also refits both models (~2 h 
 python scripts/behaviour.py         # minutes
 python scripts/spiking.py           # ~2 h
 python scripts/synthetic.py         # ~15 min
-jupyter nbconvert --to notebook --execute --inplace notebooks/fig*.ipynb
+jupyter nbconvert --to notebook --execute --inplace figure_notebooks/fig*.ipynb
 ```
 
 The figures only need `results/`, which is committed. `BUGS.md` lists the differences from the code that produced
