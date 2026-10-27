@@ -11,7 +11,7 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 | `scripts/` | pipelines that run the methods and write `results/` |
 | `results/` | precomputed results, small text and `.npz` files, read by the figures |
 | `plots/` | plotting code, one module per figure (`style.py`: shared style) |
-| `notebooks/` | one notebook per figure: loads `results/`, draws the figure (`figures/`), prints the numbers quoted in the text |
+| `notebooks/` | one notebook per figure: loads `results/`, draws the figure (`figures/`), prints the numbers quoted in the text; `rate_model.ipynb` and `spiking_network.ipynb`: example simulations to play with the two models (under a minute each) |
 
 ### Methods (`nmdaint/`)
 
