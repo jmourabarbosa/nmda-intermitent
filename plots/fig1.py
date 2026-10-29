@@ -3,17 +3,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 
-from nmdaint import paths, ratemodel
+from nmdaint import ratemodel
 from .style import C_OFF, C_ON, C_UN, GREY, INK, LIGHT, letter, runs, shade
 
 QUIET, DIPS, CUE = 1000, 1500, 75
-GAINS = (('high', 2.0, 'High'), ('mid', 1.0, 'Mid'), ('low', 0.5, 'Low'))
 SHADES = {'off': ('#16606d', C_OFF, '#86d3e0'), 'on': ('#9c1215', C_ON, '#f39a9c')}
 Z_INK = ('#7f7f7f', INK, '#bdbdbd')
 
 
-def plot():
-    e = np.load(paths.results('ratemodel', 'example_trial.npz'))
+def draw(e, lengths, gains):
+    """e: the example trial (t, rc, ru, sc, su, m at 1 ms; tz, dw, eta, state of the read-out; gain).
+    gains: {name: gain relative to the calibrated one}, three of them, the calibrated one (1) in the middle;
+    lengths: {name: onoff.stats of all simulated trials read out at that gain}."""
+    GAINS = [(k, f, k.capitalize()) for k, f in gains.items()]
     t, tz, state = e['t'], e['tz'], e['state']
     r_max = ratemodel.FIXED['r_max']
     fig = plt.figure(figsize=(7.2, 3.0))
@@ -56,7 +58,7 @@ def plot():
         d.axhline(y, color=c, ls=(0, (3, 2)), lw=0.6)
         d.text(1.005, y, txt, transform=d.get_yaxis_transform(), color=c, fontsize=7.5, va='center')
     z = e['gain'] * e['dw'] + e['eta']
-    d.set_ylim(z.min() - 0.3, 2.0 * e['gain'] * e['dw'].max() + e['eta'].max() + 0.3)
+    d.set_ylim(z.min() - 0.3, max(gains.values()) * e['gain'] * e['dw'].max() + e['eta'].max() + 0.3)
     d.set_yticks([0, 5, 10], ['0', '', '10'])
     d.set_ylabel('Decoding z')
     d.set_title(r'$z(t) = c\,[r_\mathrm{cued}(t) - r_\mathrm{uncued}(t)] + \eta(t)$', fontsize=7.5, loc='left', pad=2)
@@ -71,12 +73,12 @@ def plot():
         h = fig.add_subplot(gh[j], sharex=fig.axes[-1] if j else None)
         top = 0
         for i, (key, _, lab) in enumerate(GAINS):
-            cnt = e[f'{key}_h_{name}']
+            cnt = lengths[key][f'h_{name}']
             hm = (cnt[:30][0::2] + cnt[:30][1::2]) / max(cnt.sum(), 1)
             w = 40 / len(GAINS)
             h.bar(np.arange(0, 600, 40) + i * w, hm, width=w, align='edge', color=SHADES[name][i], lw=0)
             top = max(top, hm.max())
-            h.text(0.97, 0.66 - 0.17 * i, f"{lab}, {float(e[f'{key}_n_{name}']):.1f}/trial", transform=h.transAxes,
+            h.text(0.97, 0.66 - 0.17 * i, f"{lab}, {float(lengths[key][f'n_{name}']):.1f}/trial", transform=h.transAxes,
                    ha='right', va='top', color=SHADES[name][i], fontsize=6.5)
         h.set_xlim(0, 620); h.set_xticks([0, 200, 400, 600])
         top = np.ceil(top * 10) / 10

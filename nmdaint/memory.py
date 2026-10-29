@@ -17,11 +17,10 @@ TAUS = (20, 30, 40, 50, 60, 80, 100, 120, 150, 200, 250, 300, 400, 500, 750, 100
 N_SWEEP, BATCH = 30000, 1000
 
 
-def single_dip(p):
-    """Dip length (ms) and memory held, per trial."""
-    held = [ratemodel.memory_correct(ratemodel.simulate(p, N_DIP, seed=50000 + i, m=ratemodel.single_dip(p, N_DIP, ONSET, L)))
-            for i, L in enumerate(LENGTHS)]
-    return np.repeat(LENGTHS, N_DIP), np.concatenate(held)
+def single_dip(p, lengths=LENGTHS, n=N_DIP, onset=ONSET):
+    """Number of trials holding the memory, for each dip length (ms; n trials each, the dip from `onset` ms)."""
+    return np.array([ratemodel.memory_correct(ratemodel.simulate(p, n, seed=50000 + i, m=ratemodel.single_dip(p, n, onset, L))).sum()
+                     for i, L in enumerate(lengths)])
 
 
 def reference_gain(p, ses):
@@ -29,13 +28,13 @@ def reference_gain(p, ses):
     return readout.evaluate(p, ses, n_trials=1056, seed=0, sets=('all',))['sets']['all']['gain']
 
 
-def tau_sweep(p, tau, gain):
-    """Fraction of the delay Off and memory held of N_SWEEP trials with tau_N = tau."""
+def tau_sweep(p, tau, gain, n_trials=N_SWEEP):
+    """Fraction of the delay Off and memory held of n_trials trials with tau_N = tau."""
     rng = np.random.default_rng(int(tau))
     p = {**p, 'tau_N': float(tau)}
     rho = readout.RHO['all']
     frac, held, thr = [], [], None
-    for b in range(N_SWEEP // BATCH):
+    for b in range(n_trials // BATCH):
         sim = ratemodel.simulate(p, BATCH, seed=90000 + b)
         dw, tz = readout.rate_diff(sim)
         if thr is None:

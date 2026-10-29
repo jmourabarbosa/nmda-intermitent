@@ -3,9 +3,7 @@ monkeys' performance."""
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
-from nmdaint import paths
 from nmdaint.behaviour import wilson
 from .style import C_FIT, C_OFF, C_ON, C_STP, GREY, INK
 
@@ -22,18 +20,19 @@ def stars(p):
     return '***' if p < 0.001 else '**' if p < 0.01 else '*' if p < 0.05 else 'n.s.'
 
 
-def plot():
+def draw(single_dip, glmm, weights, tau):
+    """single_dip: {model: (dip lengths, trials, memory held)}; glmm, weights: behaviour.glmm_single; tau:
+    behaviour.fit_tau with 'bin_ms' and 'p_correct_model'."""
     plt.rcParams.update({'xtick.minor.size': 1.5})
     FW, FH, SIDE, BOT = 7.2, 1.95, 1.12, 0.48
     fig = plt.figure(figsize=(FW, FH))
     sx, a, bx, dx = (fig.add_axes([x0 / FW, BOT / FH, SIDE / FW, SIDE / FH]) for x0 in (0.55, 2.72, 4.37, 6.0))
     # a: single-dip test, both models (no read-out)
-    sd = pd.read_csv(paths.results('ratemodel', 'single_dip.csv'))
     for model, col in (('nmda', INK), ('stp', C_STP)):
-        d = sd[sd.model == model]
-        lo, hi = wilson(d.held.values, d.n.values)
-        sx.fill_between(d.dip_ms, lo, hi, color=col, alpha=0.18, lw=0)
-        sx.plot(d.dip_ms, d.held / d.n, '-', color=col, lw=1.2)
+        L, n, held = single_dip[model]
+        lo, hi = wilson(held, n)
+        sx.fill_between(L, lo, hi, color=col, alpha=0.18, lw=0)
+        sx.plot(L, held / n, '-', color=col, lw=1.2)
     sx.set_xlim(0, 1000); sx.set_xticks([0, 500, 1000]); sx.set_ylim(0, 1.03)
     sx.set_yticks([0, 0.5, 1], ['0', '', '1']); sx.yaxis.labelpad = 1
     sx.set_xlabel('Silence duration (ms)'); sx.set_ylabel('Fraction memory held')
@@ -42,8 +41,7 @@ def plot():
     sx.text(450, 0.45, 'NMDA model', color=INK, fontsize=7, ha='left', va='center')
     letter(sx, 'a')
     # b: effect of each statistic on the log-odds of an error, per within-session SD
-    g = pd.read_csv(paths.results('behaviour', 'glmm.csv')).set_index('predictor')
-    sw = pd.read_csv(paths.results('behaviour', 'glmm_sessions.csv'))
+    g, sw = glmm.set_index('predictor'), weights
     jit = np.random.default_rng(0)
     for q, (stat, name, col) in enumerate(STATS):
         r, s = g.loc[stat], sw[sw.predictor == stat]
@@ -59,7 +57,7 @@ def plot():
     a.set_xlabel(r'$\beta$')
     letter(a, 'b', x=-0.88)
     # c: fraction correct against Off time, data and the best-fitting NMDA model
-    t = np.load(paths.results('behaviour', 'tau_fit.npz'))
+    t = tau
     k, n, cen = t['k'], t['n'], t['bin_ms']
     pk = k / n
     lo, hi = wilson(k, n)

@@ -98,6 +98,14 @@ def evaluate(p, ses, n_trials=1056, seed=0, sets=tuple(SETS), sim=None, gains=No
 
 
 
+def summary(out, ses, hist):
+    """One row per decoded population of an evaluate() output: memory, gain, fit loss and the On/Off statistics."""
+    keys = ('n_off', 'off_median', 'off_mean', 'frac_off', 'n_on', 'on_median', 'on_mean', 'frac_on')
+    return pd.DataFrame([dict(set=lab, memory=out['mem'], gain=r['gain'],
+                              loss=loss(r, ses[lab], {s: hist[lab, s] for s in ('on', 'off')}), **{k: r[k] for k in keys})
+                         for lab, r in out['sets'].items()]).set_index('set')
+
+
 def loss(r, d, h):
     """Fit loss of one decoded population: mean squared scaled error of the six statistics plus W_HIST x the summed
     squared Hellinger-type distance between the model's and the data's On and Off length distributions (states of

@@ -8,11 +8,11 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 | folder | content |
 |---|---|
 | `nmdaint/` | **the methods** (no plotting). Read these to check the methodology. |
-| `scripts/` | pipelines that run the methods and write `results/` |
-| `results/` | precomputed results, small text and `.npz` files, read by the figures |
-| `plots/` | plotting code, one module per figure (`style.py`: shared style) |
-| `figure_notebooks/` | one notebook per figure: loads `results/`, draws the figure (`figures/`), prints the numbers quoted in the text |
+| `figure_notebooks/` | **one notebook per figure: the analysis behind it**, step by step, with the parameters at the top. Change one and rerun to see what happens. |
 | `model_notebooks/` | `rate_model.ipynb`, `spiking_network.ipynb`: example simulations to play with the two models (under a minute each) |
+| `scripts/` | the few computations too heavy for a notebook; they write `results/` |
+| `results/` | outputs of `scripts/` (decoders of the recordings, the tau sweep, spiking-network simulations) |
+| `plots/` | drawing only: `draw(...)` of each figure takes the notebook's results (`style.py`: shared style) |
 
 ### Methods (`nmdaint/`)
 
@@ -33,14 +33,14 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 
 ### Figures
 
-| figure | notebook (`figure_notebooks/`) | results from |
-|---|---|---|
-| 1 | `fig1.ipynb` | `scripts/ratemodel.py` |
-| 2 | `fig2.ipynb` | `scripts/recordings.py`, `scripts/ratemodel.py` |
-| 3 | `fig3.ipynb` | `scripts/ratemodel.py`, `scripts/behaviour.py` |
-| 4 | `fig4.ipynb` | `scripts/spiking.py`, `scripts/recordings.py` |
-| S1 | `figS1.ipynb` | `scripts/ratemodel.py`, `scripts/recordings.py`, `scripts/synthetic.py` |
-| S2, S3 | `figS2.ipynb`, `figS3.ipynb` | `scripts/recordings.py`, `scripts/ratemodel.py` |
+| figure | notebook (`figure_notebooks/`) | runs live (time) | loads from `results/` |
+|---|---|---|---|
+| 1 | `fig1.ipynb` | rate model, read-out (40 s) | the data's On/Off statistics |
+| 2 | `fig2.ipynb` | rate model, read-out of 7 populations (30 s); optional: data decoder on one session | the data's On/Off statistics |
+| 3 | `fig3.ipynb` | single-dip test, mixed model, tau fit (2 min) | per-trial statistics; tau sweep (optional rerun) |
+| 4 | `fig4.ipynb` | network read-out, tuning, PCA, Procrustes (4 min) | network spike counts; the data's Procrustes and PCA plane |
+| S1 | `figS1.ipynb` | read-out, calibration, synthetic validation (3 min) | the data's pre-cue z autocorrelation and one session's delay z |
+| S2, S3 | `figS2.ipynb`, `figS3.ipynb` | control without dips, STP model (1-3 min) | the data's On/Off statistics |
 
 ## Running
 
@@ -48,14 +48,15 @@ Data: the 25 sessions (`yymmdd.mat`) of Panichello et al. (2024), Dryad doi:10.5
 github.com/jmourabarbosa/panichello. By default they are read from `../panichello`; set `NMDAINT_DATA` otherwise.
 
 ```
-pip install -e .                    # Python 3.13; versions in requirements.txt
-python scripts/recordings.py        # ~4 h on 4 cores (sessions cached in cache/)
-python scripts/ratemodel.py         # ~1 h; --fit also refits both models (~2 h per run)
-python scripts/behaviour.py         # minutes
-python scripts/spiking.py           # ~2 h
-python scripts/synthetic.py         # ~15 min
-jupyter nbconvert --to notebook --execute --inplace figure_notebooks/fig*.ipynb
+pip install -e .                    # Python 3.11-3.13; versions in requirements.txt
+jupyter notebook figure_notebooks/  # the figures: about 12 min for all seven
+
+# only to recompute results/ (not needed for the notebooks):
+python scripts/recordings.py        # decoders of the recordings, ~1.5-4 h on 4 cores (needs the data)
+python scripts/tau_sweep.py         # ~20 min, after recordings
+python scripts/spiking.py           # network simulations, ~2 h
+python scripts/fit.py               # refits of both models, ~2 h per run (the figures use the published fits)
 ```
 
-The figures only need `results/`, which is committed. `BUGS.md` lists the differences from the code that produced
+The notebooks only need `results/`, which is committed. `BUGS.md` lists the differences from the code that produced
 the submitted figures and the problems found while refactoring.

@@ -123,5 +123,15 @@ def shape_similarity(Zd, Zpre, cue, state, half, k=7, n_shuf=50):
     return res
 
 
+def analyse(Zd, Zpre, cue, state, plane=False):
+    """Procrustes table (one row per space and period) and, if asked, the PCA plane of one session. Zd, Zpre: delay
+    and pre-cue activity of the analysed units (trials, times, units); state: On/Off states over the delay."""
+    half = trial_halves(cue, np.random.default_rng(0))
+    rows = [dict(space=sp, period=p, similarity=v[0], shuffle_mean=v[1], n_trials=v[2], shuffle_p95=v[3],
+                 normalised=normalised(*v[:2]))
+            for sp, d in shape_similarity(Zd, Zpre, cue, state, half).items() for p, v in d.items()]
+    return rows, ring_and_centroids(*project(Zd, cue, half), cue, state) if plane else None
+
+
 def normalised(similarity, shuffle_mean):
     return (similarity - shuffle_mean) / (1 - shuffle_mean)

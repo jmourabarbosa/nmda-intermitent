@@ -1,9 +1,8 @@
 """Figure 4: the mechanism in a spiking ring-attractor network, and the population code in On and Off states."""
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
-from nmdaint import paths, spiking
+from nmdaint import spiking
 from .style import C_NET, C_OFF, C_ON, GREY, INK, LIGHT, letter, runs
 
 QUIET, XL = 1000, (-300, 2000)
@@ -42,10 +41,10 @@ def pca_scatter(ax, rows, title):
     ax.set_title(title, fontsize=7.5, pad=3)
 
 
-def pca_panels(fig):
+def pca_panels(fig, planes, procrustes):
     d1 = fig.add_axes([0.675, 0.06, 0.15, 0.36]); d2 = fig.add_axes([0.85, 0.06, 0.15, 0.36])
-    pca_scatter(d1, pd.read_csv(paths.results('population', 'net_pca_plane.csv')), 'Network')
-    pca_scatter(d2, pd.read_csv(paths.results('population', 'data_pca_plane.csv')), 'Data')
+    pca_scatter(d1, planes['network'], 'Network')
+    pca_scatter(d2, planes['data'], 'Data')
     letter(d1, 'd', x=-0.1, y=1.02)
     key = d2.inset_axes([0.0, 0.7, 0.3, 0.3]); key.set_aspect('equal'); key.axis('off')
     for k in range(8):
@@ -59,8 +58,8 @@ def pca_panels(fig):
     # e: normalised Procrustes similarity in the 7 PCs of the cue means
     e = fig.add_axes([0.885, 0.6, 0.11, 0.26])
     x = np.array([0, 1, 2])
-    for fn, dx, col in (('data_procrustes.csv', -0.12, INK), ('net_procrustes.csv', 0.12, C_NET)):
-        D = pd.read_csv(paths.results('population', fn))
+    for name, dx, col in (('data', -0.12, INK), ('network', 0.12, C_NET)):
+        D = procrustes[name]
         M = D[D.space == 'pcs'].pivot(index='session', columns='period', values='normalised')[['on', 'off', 'pre']].values
         for row in M:
             e.plot(x[:2] + dx, row[:2], color=col, lw=0.4, alpha=0.3)
@@ -76,8 +75,10 @@ def pca_panels(fig):
     letter(e, 'e', x=-0.6, y=1.05)
 
 
-def plot():
-    tr = np.load(paths.results('spiking', 'example_trial.npz'))
+def draw(tr, lengths, tuning, planes, procrustes):
+    """tr: the example trial (spike_t, spike_cell, t1, m_eff, tz, z, state); lengths: onoff.stats of the sessions'
+    all-units read-out (h_on, h_off, n_on, n_off); tuning: spiking_readout.tuning; planes, procrustes: {'data',
+    'network'}: population.ring_and_centroids tables and Procrustes tables (session, period, space, normalised)."""
     fig = plt.figure(figsize=(7.2, 3.4))
     gs = fig.add_gridspec(3, 1, height_ratios=[2.0, 0.35, 1.6], hspace=0.22, left=0.075, right=0.37, top=0.86, bottom=0.14)
     gb = fig.add_gridspec(2, 1, hspace=0.4, left=0.48, right=0.6, top=0.86, bottom=0.14)
@@ -121,7 +122,7 @@ def plot():
     for ax in (a, m):
         ax.tick_params(labelbottom=False)
     # b: Off and On lengths of the all-units decoder
-    hl = np.load(paths.results('spiking', 'state_lengths.npz'))
+    hl = lengths
     for j, (name, col) in enumerate((('off', C_OFF), ('on', C_ON))):
         h = fig.add_subplot(gb[j])
         cnt = hl[f'h_{name}'].astype(float)
@@ -139,7 +140,7 @@ def plot():
             h.set_xlabel('State length (ms)')
     # c: cross-validated tuning in On and Off states (mean +- s.e.m. over cells)
     c = fig.add_subplot(gc[0])
-    tun = np.load(paths.results('spiking', 'tuning.npz'))
+    tun = tuning
     x = np.arange(-4, 5) * 45
     for name, col, lab in (('on', C_ON, 'On states'), ('off', C_OFF, 'Off states')):
         v = tun[name][:, [(k + 4) % 8 for k in range(9)]]          # cue offsets -180 ... 180 deg
@@ -151,5 +152,5 @@ def plot():
     c.set_xlabel('Cue from pref. (deg)')
     c.set_ylabel('Firing rate (z)')
     letter(c, 'c', x=-0.5, y=1.05)
-    pca_panels(fig)
+    pca_panels(fig, planes, procrustes)
     return fig

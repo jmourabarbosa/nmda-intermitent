@@ -6,7 +6,7 @@ results/recordings/
   per_trial.csv             per-trial Off/On statistics of correct and error trials, all units (Fig. 3b-d)
   precue_acf.csv            autocorrelation of the pre-cue z of three decoded populations (Fig. S1b)
   example_delay_z.npz       delay z of the session closest to the mean decoding strength, with its mixture fit (Fig. S1c)
-results/population/data_*.csv   PCA plane of an example session and Procrustes similarity (Fig. 4d, e)
+  procrustes.csv, pca_plane.csv  Procrustes similarity and the PCA plane of an example session (Fig. 4d, e)
 
 usage: python scripts/recordings.py [--jobs 4]
 """
@@ -59,12 +59,9 @@ def run_session(path):
     # population geometry: states from all units of one half of the units, activity of the other half
     H1, H2 = population.unit_halves(S.n_units)
     _, st = S.states(S.confidence((H1, H1)))
-    half = population.trial_halves(S.cue, np.random.default_rng(0))
-    Zd, Zpre, st_d = S.Z[:, S.delay][:, :, H2], S.Z[:, S.t < 0][:, :, H2], st[:, S.delay[S.sw]]
-    res['procrustes'] = population.shape_similarity(Zd, Zpre, S.cue, st_d, half)
-    if S.name == EXAMPLE_PCA:
-        res['pca'] = population.ring_and_centroids(*population.project(Zd, S.cue, half), S.cue, st_d)
-        res['cue_ang'] = S.cue_ang
+    res['procrustes'], res['pca'] = population.analyse(S.Z[:, S.delay][:, :, H2], S.Z[:, S.t < 0][:, :, H2], S.cue,
+                                                       st[:, S.delay[S.sw]], plane=S.name == EXAMPLE_PCA)
+    res['cue_ang'] = S.cue_ang
     np.savez(f, res=np.array(res, dtype=object))
     return res
 
@@ -98,13 +95,11 @@ def main():
     np.savez(paths.results('recordings', 'example_delay_z.npz'), session=ex['name'], z=z, mu_on_mean=mu.mean(),
              gmm_weights=gm.weights_, gmm_means=gm.means_.ravel(), gmm_sds=np.sqrt(gm.covariances_.ravel()))
 
-    pd.DataFrame([dict(session=s['name'], period=p, space=sp, similarity=v[0], shuffle_mean=v[1], n_trials=v[2],
-                       shuffle_p95=v[3], normalised=population.normalised(*v[:2]))
-                  for s in res for sp, d in s['procrustes'].items() for p, v in d.items()]
-                 ).to_csv(paths.results('population', 'data_procrustes.csv'), index=False)
-    ex = next(s for s in res if 'pca' in s)
+    pd.DataFrame([dict(session=s['name'], **r) for s in res for r in s['procrustes']]).to_csv(
+        paths.results('recordings', 'procrustes.csv'), index=False)
+    ex = next(s for s in res if s['pca'])
     pd.DataFrame(ex['pca']).assign(session=ex['name'], angle_deg=np.degrees(ex['cue_ang'])).to_csv(
-        paths.results('population', 'data_pca_plane.csv'), index=False)
+        paths.results('recordings', 'pca_plane.csv'), index=False)
 
 
 if __name__ == '__main__':

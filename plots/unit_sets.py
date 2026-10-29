@@ -1,8 +1,7 @@
 """On/Off statistics of the seven decoded populations, data vs models (layout of Figs. 2, S2 and S3)."""
 import numpy as np
-import pandas as pd
 
-from nmdaint import paths, readout
+from nmdaint import readout
 from .style import GREY, INK, LIGHT, letter, plain_log
 
 SETS = list(readout.SETS)
@@ -10,11 +9,6 @@ FIT = SETS.index('all')
 PANELS = (('off_per_trial', 'n_off', 'Off states per trial', 'off'), ('off_median_ms', 'off_median', 'Off length, median (ms)', 'off'),
           ('frac_off', 'frac_off', 'Fraction of delay Off', 'off'), ('on_per_trial', 'n_on', 'On states per trial', 'on'),
           ('on_median_ms', 'on_median', 'On length, median (ms)', 'on'), ('frac_on', 'frac_on', 'Fraction of delay On', 'on'))
-
-
-def model_stats(condition):
-    s = pd.read_csv(paths.results('ratemodel', 'population_stats.csv'))
-    return s[s.condition == condition].set_index('set').loc[SETS]
 
 
 def panels(axs, ses, models, tops, span=(0.45, 0.45), fitted_dx=0.0, letter_y=1.02, mew=0):
@@ -31,7 +25,7 @@ def panels(axs, ses, models, tops, span=(0.45, 0.45), fitted_dx=0.0, letter_y=1.
         a.errorbar(x, [s.mean() for s in v], yerr=[2 * s.std(ddof=1) / np.sqrt(len(s)) for s in v], fmt='o', ms=3,
                    color=INK, elinewidth=0.6, capsize=0, zorder=3)
         for st, marker, dx, col in models:
-            a.plot(x + dx, st[mk].values, marker, ms=3, color=col[state] if isinstance(col, dict) else col, mew=mew, zorder=2)
+            a.plot(x + dx, st.loc[SETS, mk].values, marker, ms=3, color=col[state] if isinstance(col, dict) else col, mew=mew, zorder=2)
         a.axvline(2.5, color=GREY, ls=(0, (3, 2)), lw=0.5); a.axvline(5.5, color=GREY, ls=(0, (3, 2)), lw=0.5)
         a.set_xlim(-0.6, len(SETS) - 0.4)
         a.set_xticks(x); a.set_xticklabels(SETS, rotation=60, ha='right', rotation_mode='anchor', fontsize=7)

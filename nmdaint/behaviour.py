@@ -105,7 +105,8 @@ def glmm_single(trials):
     d['error'] = 1 - d['correct']
     d['session'] = d['session'].astype(str)
     d = zscore_within(d, STATS)
-    monkeys = np.column_stack([(d.monkey == m).values.astype(float) for m in ('H', 'J')])
+    monkeys = np.column_stack([(d.monkey == m).values.astype(float) for m in sorted(d.monkey.unique())[1:]] or
+                              [np.zeros((len(d), 0))])          # monkey as a fixed effect (none with one monkey)
     fixed, weights = [], []
     for s in STATS:
         Z = np.column_stack([np.ones(len(d)), d['z_' + s].values])

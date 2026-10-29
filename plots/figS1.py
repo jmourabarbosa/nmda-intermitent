@@ -1,12 +1,11 @@
 """Supplementary Figure 1: reading the model out like the data, and the validation on synthetic data."""
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 from scipy.stats import norm
 
-from nmdaint import paths, readout
+from nmdaint import readout
 from .style import C_OFF, C_ON, GREY, INK, LIGHT, letter, runs, shade
 
 C_RO, C_REP = '#2b83ba', GREY
@@ -30,10 +29,12 @@ def hlabels(a, items, loc='upper right'):
     a.add_artist(AnchoredOffsetbox(loc, child=box, pad=0.1, borderpad=0.2, frameon=False))
 
 
-def plot():
+def draw(m, acf, data_z, syn, E, ses):
+    """m: the model read-out example (t, rc, ru, m, tz, dw, eta, state, gain, rho, delay_z, mu_on_model, grid,
+    mu_on_grid, mu_on_data, gains); acf: pre-cue z autocorrelation per session, set and lag; data_z: delay z of
+    one session with its mixture fit (session, z, gmm_weights, gmm_means, gmm_sds, mu_on_mean); syn: one row per
+    synthetic session (synthetic.session); E: a synthetic example trial; ses: readout.load_data()[0]."""
     plt.rcParams.update({'font.size': 7.5, 'axes.labelsize': 7.5, 'xtick.labelsize': 6.5, 'ytick.labelsize': 6.5})
-    m = np.load(paths.results('ratemodel', 'readout_example.npz'), allow_pickle=True)
-    syn = pd.read_csv(paths.results('synthetic', 'sessions.csv'))
     C0, RHO = float(m['gain']), float(m['rho'])
     fig = plt.figure(figsize=(7.2, 8.6))
     gs = GridSpec(4, 6, figure=fig, height_ratios=[1.35, 1.0, 1.0, 0.95], hspace=0.75, wspace=1.3,
@@ -73,7 +74,7 @@ def plot():
 
     # b: pre-cue z autocorrelation of three decoded populations, and of the model's noise
     cx = fig.add_subplot(gs[1, 0:2])
-    za = pd.read_csv(paths.results('recordings', 'precue_acf.csv'))
+    za = acf
     lag = np.arange(0, 310, 10)
     for pop, kind in (('all', 'all'), ('top20', 'top'), ('random20', 'random')):
         mean = za[za.set == pop].groupby('lag_ms').acf.mean()
@@ -88,7 +89,7 @@ def plot():
     letter(cx, 'b', x=-0.4, y=1.02)
 
     # c: delay z of one session with its mixture, and the model's delay z
-    ex = np.load(paths.results('recordings', 'example_delay_z.npz'))
+    ex = data_z
     dx = fig.add_subplot(gs[1, 2:4])
     bins = np.linspace(-4, 9, 53)
     dx.hist(ex['z'], bins, density=True, color=LIGHT, lw=0)
@@ -117,7 +118,6 @@ def plot():
     letter(ex_, 'd', x=-0.36, y=1.02)
 
     # e: synthetic example trial
-    E = np.load(paths.results('synthetic', 'example.npz'))
     fx = fig.add_subplot(gs[2, 0:2])
     tt = E['tt']
     tsw = tt[(tt >= 0) & (tt <= 1400)]
@@ -133,7 +133,6 @@ def plot():
     letter(fx, 'e', x=-0.4, y=1.02)
 
     # f: decoding strength of the synthetic decoder vs the data's decoders
-    ses, _ = readout.load_data()
     gx = fig.add_subplot(gs[2, 2:4])
     jit = np.random.default_rng(0).uniform(-0.08, 0.08, 8)
     for i, (lv, lab, name) in enumerate((('weak', 'rand 20', 'Random 20'), ('medium', 'all', 'All units'), ('strong', 'top 20', 'Top 20'))):
@@ -158,7 +157,7 @@ def plot():
     hx0.set_xlim(0, 9); hx0.set_ylim(0, 0.11)
     hx0.set_xlabel('Tuning strength (Hz)'); hx0.set_ylabel('Calibrated gain c')
     gm_ = syn.groupby('level').gain_c.mean()
-    g = m['gains'].item()
+    g = m['gains']
     labels(hx0, [(f"Recovered c: {gm_['weak']:.3f}, {gm_['medium']:.3f}, {gm_['strong']:.3f}", C_RO),
                  (f"Model c: {g['rand 20']:.3f}, {g['all']:.3f}, {g['top 20']:.3f}", INK), ('Dashed: proportional fit', GREY)],
            0.03, 0.98, 0.11)
