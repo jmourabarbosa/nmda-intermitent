@@ -2,10 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from nmdaint import spiking
-from .style import C_NET, C_OFF, C_ON, GREY, INK, LIGHT, letter, runs
+from nmdaint import onoff
+from .style import C_NET, C_OFF, C_ON, GREY, INK, LIGHT, letter, limits, runs
 
-QUIET, XL = 1000, (-300, 2000)
 
 
 def shade(ax, t, state, step):
@@ -68,7 +67,8 @@ def pca_panels(fig, planes, procrustes):
         e.plot(x[:2] + dx, mu[:2], color=col, lw=1.2)
         e.errorbar(x + dx, mu, yerr=se, fmt='o', ms=3.5, color=col, lw=1.0, capsize=0)
     e.axhline(0, color=GREY, ls=(0, (3, 2)), lw=0.6)
-    e.set_xticks(x, ['On', 'Off', 'Pre']); e.set_xlim(-0.4, 2.4); e.set_ylim(-0.4, 1.05); e.set_yticks([0, 0.5, 1], ['0', '', '1'])
+    e.set_xticks(x, ['On', 'Off', 'Pre']); e.set_xlim(-0.4, 2.4)
+    limits(e, 'y', -0.4, 1.05, np.concatenate([D[D.space == 'pcs'].normalised.values for D in procrustes.values()]), [0, 0.5, 1], ['0', '', '1'])
     e.set_ylabel('Shape similarity\nto cue ring', labelpad=1)
     e.text(0.6, 0.8, 'Data', transform=e.transAxes, color=INK, fontsize=6, va='top')
     e.text(0.6, 0.68, 'Network', transform=e.transAxes, color=C_NET, fontsize=6, va='top')
@@ -76,7 +76,8 @@ def pca_panels(fig, planes, procrustes):
 
 
 def draw(tr, lengths, tuning, planes, procrustes):
-    """tr: the example trial (spike_t, spike_cell, t1, m_eff, tz, z, state); lengths: onoff.stats of the sessions'
+    """tr: the example trial (spike_t, spike_cell over n_e cells, t1, m_eff, tz, z, state; quiet: ms of delay without
+    dips, cue_dur: ms); lengths: onoff.stats of the sessions'
     all-units read-out (h_on, h_off, n_on, n_off); tuning: spiking_readout.tuning; planes, procrustes: {'data',
     'network'}: population.ring_and_centroids tables and Procrustes tables (session, period, space, normalised)."""
     fig = plt.figure(figsize=(7.2, 3.4))
@@ -85,19 +86,20 @@ def draw(tr, lengths, tuning, planes, procrustes):
     gc = fig.add_gridspec(1, 1, left=0.705, right=0.825, top=0.86, bottom=0.6)
     a, m, d = fig.add_subplot(gs[0]), fig.add_subplot(gs[1]), fig.add_subplot(gs[2])
     # a, top: spikes as counts in 5 ms x 8-cell bins, cells in order of preferred location
-    n_e = spiking.P['N_E']
-    te, ce = np.arange(-500, 2001, 5), np.arange(0, n_e + 1, 8)
+    t_end, quiet, cue_dur = tr['t1'][-1] + 1, tr['quiet'], tr['cue_dur']
+    xl, span = (tr['tz'][0], t_end), t_end - tr['tz'][0]     # time axis: decoded window to the end of the delay
+    te, ce = np.arange(tr['t1'][0], t_end + 1, 5), np.arange(0, tr['n_e'] + 1, 8)
     H, _, _ = np.histogram2d(tr['spike_t'], tr['spike_cell'], bins=(te, ce))
     a.imshow(H.T, origin='lower', aspect='auto', cmap='Greys', vmin=0, vmax=np.percentile(H[H > 0], 95),
              extent=(te[0], te[-1], 0, 360), interpolation='nearest')
-    a.axvspan(0, 50, color=LIGHT, alpha=0.6, lw=0, zorder=0)
+    a.axvspan(0, cue_dur, color=LIGHT, alpha=0.6, lw=0, zorder=0)
     a.set_ylim(0, 360); a.set_yticks([0, 180, 360]); a.set_ylabel('Location (deg)')
     xa = a.get_xaxis_transform()
     for dx, label in ((1, 'Fluctuating attention'), (-1, 'Constant attention')):
-        a.annotate('', xy=(QUIET + dx * 110, 1.06), xytext=(QUIET + dx * 15, 1.06), xycoords=xa, textcoords=xa,
-                   arrowprops=dict(arrowstyle='-|>', color=INK, lw=0.6, mutation_scale=5), annotation_clip=False)
-        a.text(QUIET + dx * 125, 1.06, label, transform=xa, fontsize=6.5, va='center', ha='left' if dx > 0 else 'right')
-    a.text(25, 340, 'Cue', fontsize=7, ha='center', va='top', color=GREY)
+        a.annotate('', xy=(quiet + dx * span * 110 / 2300, 1.06), xytext=(quiet + dx * span * 15 / 2300, 1.06), xycoords=xa,
+                   textcoords=xa, arrowprops=dict(arrowstyle='-|>', color=INK, lw=0.6, mutation_scale=5), annotation_clip=False)
+        a.text(quiet + dx * span * 125 / 2300, 1.06, label, transform=xa, fontsize=6.5, va='center', ha='left' if dx > 0 else 'right')
+    a.text(cue_dur / 2, 340, 'Cue', fontsize=7, ha='center', va='top', color=GREY)
     letter(a, 'a')
     # a, middle: common input with its overshoot after each dip
     m.plot(tr['t1'], tr['m_eff'], color=INK, lw=0.7)
@@ -110,15 +112,15 @@ def draw(tr, lengths, tuning, planes, procrustes):
     tz, z = tr['tz'], tr['z']
     shade(d, tz, tr['state'], 10)
     d.plot(tz, z, color=INK)
-    for y, c, txt in ((0, GREY, ''), (1.96, C_ON, 'P < 0.05'), (0.84, C_OFF, 'P > 0.20')):
+    for y, c, txt in ((0, GREY, ''), (onoff.ON_Z, C_ON, 'P < 0.05'), (onoff.OFF_Z, C_OFF, 'P > 0.20')):
         d.axhline(y, color=c, ls=(0, (3, 2)), lw=0.6)
         d.text(1.005, y, txt, transform=d.get_yaxis_transform(), color=c, fontsize=7, va='bottom' if y > 1 else 'top')
-    d.set_ylim(-3, max(12, np.ceil(z[tz <= XL[1]].max()) + 1)); d.set_yticks([0, 5, 10])
+    d.set_ylim(min(-3, np.floor(z.min())), max(12, np.ceil(z[tz <= xl[1]].max()) + 1)); d.set_yticks([0, 5, 10])
     d.set_ylabel('Decoding z')
     d.set_xlabel('Time from cue onset (ms)')
     for ax in (a, m, d):
-        ax.axvline(QUIET, color=GREY, ls=(0, (3, 2)), lw=0.6)
-        ax.set_xlim(*XL)
+        ax.axvline(quiet, color=GREY, ls=(0, (3, 2)), lw=0.6)
+        ax.set_xlim(*xl)
     for ax in (a, m):
         ax.tick_params(labelbottom=False)
     # b: Off and On lengths of the all-units decoder
@@ -131,7 +133,7 @@ def draw(tr, lengths, tuning, planes, procrustes):
         h.text(0.97, 0.8, f"{float(hl[f'n_{name}']):.1f}/trial", transform=h.transAxes, ha='right', va='top', color=col, fontsize=6.5)
         h.text(0.97, 0.97, f'{name.capitalize()} states', transform=h.transAxes, ha='right', va='top', color=col, fontsize=7.5)
         h.set_xlim(0, 600); h.set_xticks([0, 300, 600])
-        h.set_ylim(0, 0.4); h.set_yticks([0, 0.2, 0.4], ['0', '', '0.4'])
+        limits(h, 'y', 0, 0.4, frac, [0, 0.2, 0.4], ['0', '', '0.4'])
         h.set_ylabel('Fraction\nof states', labelpad=-14)
         if j == 0:
             letter(h, 'b', x=-0.55, y=1.0)
@@ -142,13 +144,16 @@ def draw(tr, lengths, tuning, planes, procrustes):
     c = fig.add_subplot(gc[0])
     tun = tuning
     x = np.arange(-4, 5) * 45
-    for name, col, lab in (('on', C_ON, 'On states'), ('off', C_OFF, 'Off states')):
-        v = tun[name][:, [(k + 4) % 8 for k in range(9)]]          # cue offsets -180 ... 180 deg
+    curves = {name: tun[name][:, [(k + 4) % 8 for k in range(9)]] for name in ('on', 'off')}   # offsets -180 ... 180 deg
+    for name, col in (('on', C_ON), ('off', C_OFF)):
+        v = curves[name]
         c.errorbar(x, v.mean(0), yerr=v.std(0) / np.sqrt(len(v)), color=col, marker='o', ms=2.5, lw=0.9, capsize=0)
-        c.text(-170, 2.0 if name == 'on' else 1.74, lab, color=col, fontsize=6.5, va='top')
     c.axhline(0, color=GREY, ls=(0, (3, 2)), lw=0.6)
     c.set_xticks([-180, 0, 180]); c.set_xlim(-195, 195)
-    c.set_ylim(-0.8, 2.0); c.set_yticks([-0.5, 0, 0.5, 1.0, 1.5, 2.0], ['', '0', '', '1', '', '2'])
+    ends = np.r_[[v.mean(0) + s * v.std(0) / np.sqrt(len(v)) for v in curves.values() for s in (-1, 1)]]
+    top = limits(c, 'y', -0.8, 2.0, ends, [-0.5, 0, 0.5, 1.0, 1.5, 2.0], ['', '0', '', '1', '', '2'])[1]
+    for name, col, dy in (('on', C_ON, 0), ('off', C_OFF, 0.26)):
+        c.text(-170, top - dy, f'{name.capitalize()} states', color=col, fontsize=6.5, va='top')
     c.set_xlabel('Cue from pref. (deg)')
     c.set_ylabel('Firing rate (z)')
     letter(c, 'c', x=-0.5, y=1.05)

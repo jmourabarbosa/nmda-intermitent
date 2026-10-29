@@ -2,7 +2,7 @@
 import numpy as np
 
 from nmdaint import readout
-from .style import GREY, INK, LIGHT, letter, plain_log
+from .style import GREY, INK, LIGHT, letter, limits, plain_log
 
 SETS = list(readout.SETS)
 FIT = SETS.index('all')
@@ -29,9 +29,11 @@ def panels(axs, ses, models, tops, span=(0.45, 0.45), fitted_dx=0.0, letter_y=1.
         a.axvline(2.5, color=GREY, ls=(0, (3, 2)), lw=0.5); a.axvline(5.5, color=GREY, ls=(0, (3, 2)), lw=0.5)
         a.set_xlim(-0.6, len(SETS) - 0.4)
         a.set_xticks(x); a.set_xticklabels(SETS, rotation=60, ha='right', rotation_mode='anchor', fontsize=7)
-        a.set_ylim(0, tops[k] or np.ceil(a.get_ylim()[1]))
-        if tops[k] == 1:
-            a.set_yticks([0, 0.5, 1], ['0', '', '1'])
+        if tops[k]:                       # the paper's limit, widened if the data or a model exceed it
+            values = np.r_[np.concatenate(v), np.concatenate([st.loc[SETS, mk].values for st, *_ in models])]
+            limits(a, 'y', 0, tops[k], values, *(([0, 0.5, 1], ['0', '', '1']) if tops[k] == 1 else ()))
+        else:
+            a.set_ylim(0, np.ceil(a.get_ylim()[1]))
         a.set_ylabel(name)
         letter(a, 'abcdef'[k], x=-0.5, y=letter_y)
         a.text(FIT + fitted_dx, 0.97, 'Fitted', transform=a.get_xaxis_transform(), ha='center', va='top', rotation=90, fontsize=7)
@@ -56,7 +58,7 @@ def loss_panels(fig, gs, conds, ylim_g, xt_h, fontsize_h):
     g.set_yscale('log'); g.set_xticks(x); g.set_xticklabels(SETS, rotation=60, ha='right', rotation_mode='anchor', fontsize=7)
     g.axvline(2.5, color=GREY, ls=(0, (3, 2)), lw=0.5); g.axvline(5.5, color=GREY, ls=(0, (3, 2)), lw=0.5)
     g.set_ylabel('Fit loss (log)'); g.set_xlim(-0.6, len(SETS) - 0.4)
-    g.set_ylim(*ylim_g); plain_log(g, 1)
+    g.set_ylim(ylim_g[0], max(ylim_g[1], 3 * max(np.max(loss) for _, loss, _ in conds))); plain_log(g, 1)
     for n, (name, _, c) in enumerate(conds):
         g.text(0.02, 0.97 - n * 0.11, name, color=c, transform=g.transAxes, ha='left', va='top', fontsize=7)
     letter(g, 'g', x=-0.2, y=1.02)

@@ -17,6 +17,7 @@ from . import decoder, onoff, ratemodel, readout, recordings
 
 N_UNITS, F_TUNED, N_PER_CUE, GAIN_SD = 330, 0.3, 70, 0.1
 LEVELS = {'weak': 3.2, 'medium': 4.6, 'strong': 7.8}          # tuning k (Hz at a pool rate of 50 Hz)
+TARGETS = {'weak': 'rand 20', 'medium': 'all', 'strong': 'top 20'}   # the data's decoder each level is matched to
 N_SESSIONS = 8
 STEP, WIN = 10, 100
 GRID = 10 ** np.linspace(-3, 0, 25)

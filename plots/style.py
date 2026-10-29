@@ -44,3 +44,18 @@ def save(fig, path, dpi=600):
     """PNG and SVG (editable text)."""
     fig.savefig(path, dpi=dpi)
     fig.savefig(path.rsplit('.', 1)[0] + '.svg')
+
+
+def limits(ax, axis, lo, hi, values, ticks=None, labels=None):
+    """Set the paper's axis limits (lo, hi) and ticks; where the data fall outside them, widen the limits (5% margin)
+    and let matplotlib choose the ticks, so that changed parameters never put data off the axes."""
+    v = np.asarray(values, float).ravel()
+    v = v[np.isfinite(v)]
+    out = v.size > 0 and (v.min() < lo or v.max() > hi)
+    if out:
+        pad = 0.05 * (max(hi, v.max()) - min(lo, v.min()))
+        lo, hi = (v.min() - pad if v.min() < lo else lo), (v.max() + pad if v.max() > hi else hi)
+    (ax.set_xlim if axis == 'x' else ax.set_ylim)(lo, hi)
+    if ticks is not None and not out:
+        (ax.set_xticks if axis == 'x' else ax.set_yticks)(ticks, labels)
+    return lo, hi

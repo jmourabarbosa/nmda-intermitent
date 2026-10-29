@@ -5,18 +5,18 @@ from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 from scipy.stats import norm
 
-from nmdaint import readout
-from .style import C_OFF, C_ON, GREY, INK, LIGHT, letter, runs, shade
+from nmdaint import onoff, readout
+from .style import C_OFF, C_ON, GREY, INK, LIGHT, letter, limits, runs, shade
 
 C_RO, C_REP = '#2b83ba', GREY
 POPC = {'all': INK, 'top20': '#636363', 'random20': '#bdbdbd'}
 FS = 6.5
-LV = ['weak', 'medium', 'strong']
+NAMES = {'rand 20': 'Random 20', 'all': 'All units', 'top 20': 'Top 20'}
 
 
 def thresholds(a):
-    a.axhline(1.96, color=C_ON, lw=0.6, ls=(0, (3, 2)))
-    a.axhline(0.84, color=C_OFF, lw=0.6, ls=(0, (3, 2)))
+    a.axhline(onoff.ON_Z, color=C_ON, lw=0.6, ls=(0, (3, 2)))
+    a.axhline(onoff.OFF_Z, color=C_OFF, lw=0.6, ls=(0, (3, 2)))
 
 
 def labels(a, items, x, y, dy=0.12, ha='left'):
@@ -29,11 +29,13 @@ def hlabels(a, items, loc='upper right'):
     a.add_artist(AnchoredOffsetbox(loc, child=box, pad=0.1, borderpad=0.2, frameon=False))
 
 
-def draw(m, acf, data_z, syn, E, ses):
+def draw(m, acf, data_z, syn, E, ses, rho, targets):
     """m: the model read-out example (t, rc, ru, m, tz, dw, eta, state, gain, rho, delay_z, mu_on_model, grid,
     mu_on_grid, mu_on_data, gains); acf: pre-cue z autocorrelation per session, set and lag; data_z: delay z of
     one session with its mixture fit (session, z, gmm_weights, gmm_means, gmm_sds, mu_on_mean); syn: one row per
-    synthetic session (synthetic.session); E: a synthetic example trial; ses: readout.load_data()[0]."""
+    synthetic session (synthetic.session); E: a synthetic example trial; ses: readout.load_data()[0]; rho: read-out
+    noise share per kind of decoded population; targets: {synthetic level: the data's decoded population it matches}."""
+    LV = list(targets)
     plt.rcParams.update({'font.size': 7.5, 'axes.labelsize': 7.5, 'xtick.labelsize': 6.5, 'ytick.labelsize': 6.5})
     C0, RHO = float(m['gain']), float(m['rho'])
     fig = plt.figure(figsize=(7.2, 8.6))
@@ -67,7 +69,7 @@ def draw(m, acf, data_z, syn, E, ses):
     hlabels(ax[3], [(r'$z = c\cdot\Delta r + \eta$', INK), ('On', C_ON), ('Off', C_OFF)])
     for a in ax[:3]:
         plt.setp(a.get_xticklabels(), visible=False)
-    ax[0].set_xlim(-200, 1400)
+    ax[0].set_xlim(-200, onoff.STATE_WIN[1])
     for a in ax:
         a.yaxis.set_label_coords(-0.045, 0.5)
     letter(ax[0], 'a', x=-0.085, y=1.0)
@@ -75,14 +77,14 @@ def draw(m, acf, data_z, syn, E, ses):
     # b: pre-cue z autocorrelation of three decoded populations, and of the model's noise
     cx = fig.add_subplot(gs[1, 0:2])
     za = acf
-    lag = np.arange(0, 310, 10)
+    lag = np.arange(0, acf.lag_ms.max() + 1, 10)
     for pop, kind in (('all', 'all'), ('top20', 'top'), ('random20', 'random')):
         mean = za[za.set == pop].groupby('lag_ms').acf.mean()
         cx.plot(mean.index, mean.values, color=POPC[pop], lw=1.1)
-        rho = readout.RHO[kind]
-        cx.plot(lag, (1 - rho) * np.clip(1 - lag / 100, 0, None) + rho, color=POPC[pop], lw=0.9, ls=(0, (3, 2)))
-    cx.axvline(100, color=LIGHT, lw=0.6)
-    cx.set_xlim(0, 300); cx.set_ylim(0, 1.02)
+        rho_k = rho[kind]
+        cx.plot(lag, (1 - rho_k) * np.clip(1 - lag / readout.WIN, 0, None) + rho_k, color=POPC[pop], lw=0.9, ls=(0, (3, 2)))
+    cx.axvline(readout.WIN, color=LIGHT, lw=0.6)
+    cx.set_xlim(0, lag[-1]); cx.set_ylim(0, 1.02)
     cx.set_xlabel('Lag (ms)'); cx.set_ylabel('Pre-cue z autocorrelation')
     labels(cx, [('Solid: data, dashed: model noise', INK), ('All units', POPC['all']), ('Top 20', POPC['top20']),
                 ('Random 20', '#9e9e9e')], 0.98, 0.98, 0.11, 'right')
@@ -91,15 +93,18 @@ def draw(m, acf, data_z, syn, E, ses):
     # c: delay z of one session with its mixture, and the model's delay z
     ex = data_z
     dx = fig.add_subplot(gs[1, 2:4])
-    bins = np.linspace(-4, 9, 53)
-    dx.hist(ex['z'], bins, density=True, color=LIGHT, lw=0)
-    xs = np.linspace(-4, 9, 400)
+    q = np.percentile(m['delay_z'], (0.1, 99.9))               # the paper's window, widened if the model leaves it
+    lo_z, hi_z = min(-4, np.floor(q[0])), max(9, np.ceil(q[1]))
+    bins = np.linspace(lo_z, hi_z, int(round((hi_z - lo_z) * 4)) + 1)
+    h_data = dx.hist(ex['z'], bins, density=True, color=LIGHT, lw=0)[0]
+    xs = np.linspace(lo_z, hi_z, 400)
     for q, ls in zip(np.argsort(ex['gmm_means']), ((0, (1.5, 1.5)), '-')):
         dx.plot(xs, ex['gmm_weights'][q] * norm.pdf(xs, ex['gmm_means'][q], ex['gmm_sds'][q]), color=INK, lw=0.9, ls=ls)
-    dx.hist(m['delay_z'], bins, density=True, histtype='step', color=C_RO, lw=0.9)
+    h_model = dx.hist(m['delay_z'], bins, density=True, histtype='step', color=C_RO, lw=0.9)[0]
     mu_d = ex['gmm_means'].max()
     dx.axvline(mu_d, color=INK, lw=0.7, ls=(0, (3, 2)))
-    dx.set_xlabel('Delay z (500-1,400 ms)'); dx.set_ylabel('Density'); dx.set_ylim(0, 0.62)
+    dx.set_xlabel('Delay z (500-1,400 ms)'); dx.set_ylabel('Density')
+    limits(dx, 'y', 0, 0.62, np.r_[h_data, h_model])
     labels(dx, [(f"Data, session {ex['session']}", '#9e9e9e'), ('Mixture: lower component', INK),
                 ('Mixture: upper component', INK), ('Model', C_RO)], 0.99, 0.98, 0.1, 'right')
     dx.text(0.0, -0.36, f"Dashed: decoding strength (upper mean), session {mu_d:.2f};\nmean of sessions "
@@ -126,7 +131,7 @@ def draw(m, acf, data_z, syn, E, ses):
     fx.plot(tt, E['z_pipeline'], color=INK, lw=0.8)
     fx.plot(tt, E['z_shortcut'], color=C_RO, lw=0.8)
     thresholds(fx)
-    fx.set_xlim(-200, 1400)
+    fx.set_xlim(-200, onoff.STATE_WIN[1])
     fx.set_xlabel('Time from cue onset (ms)'); fx.set_ylabel('z')
     labels(fx, [('Decoder on synthetic spikes', INK), (r'Read-out $c\cdot\Delta r + \eta$', C_RO), ('True dips', '#9e9e9e')],
            0.99, 0.98, 0.11, 'right')
@@ -135,16 +140,18 @@ def draw(m, acf, data_z, syn, E, ses):
     # f: decoding strength of the synthetic decoder vs the data's decoders
     gx = fig.add_subplot(gs[2, 2:4])
     jit = np.random.default_rng(0).uniform(-0.08, 0.08, 8)
-    for i, (lv, lab, name) in enumerate((('weak', 'rand 20', 'Random 20'), ('medium', 'all', 'All units'), ('strong', 'top 20', 'Top 20'))):
+    vals = []
+    for i, (lv, lab) in enumerate(targets.items()):
         v = ses[lab]['mu_on']
         gx.errorbar(i - 0.15, v.mean(), 2 * v.std(ddof=1) / np.sqrt(len(v)), fmt='o', color=INK, ms=3, capsize=0, elinewidth=0.6)
         w = syn[syn.level == lv].mu_on_pipeline.values
         gx.plot(i + 0.15 + jit[:len(w)], w, '.', color=C_RO, ms=3, alpha=0.7, mew=0)
         gx.plot([i + 0.05, i + 0.25], [w.mean()] * 2, color=C_RO, lw=1)
-    gx.set_xticks(range(3), ['Random 20', 'All units', 'Top 20'])
-    gx.set_xlim(-0.5, 2.5); gx.set_ylim(0, 5)
+        vals += [*w, v.mean() + 2 * v.std(ddof=1) / np.sqrt(len(v))]
+    gx.set_xticks(range(len(targets)), [NAMES.get(lab, lab) for lab in targets.values()])
+    gx.set_xlim(-0.5, len(targets) - 0.5); limits(gx, 'y', 0, 5, vals)
     gx.set_ylabel('Decoding strength')
-    labels(gx, [('Data (25 sessions)', INK), (f'Synthetic decoder ({syn.level.value_counts().iloc[0]} sessions)', C_RO)], 0.03, 0.98)
+    labels(gx, [(f"Data ({len(ses['all']['mu_on'])} sessions)", INK), (f'Synthetic decoder ({syn.level.value_counts().iloc[0]} sessions)', C_RO)], 0.03, 0.98)
     letter(gx, 'f', x=-0.36, y=1.02)
 
     # g: gain recovered by the calibration against the tuning strength of the synthetic neurons
@@ -152,14 +159,15 @@ def draw(m, acf, data_z, syn, E, ses):
     kk, cc = syn.k.values, syn.gain_c.values
     slope = float((kk * cc).sum() / (kk * kk).sum())
     hx0.plot(kk + np.random.default_rng(1).uniform(-0.12, 0.12, len(kk)), cc, '.', color=C_RO, ms=3, alpha=0.7, mew=0)
-    xs_ = np.linspace(0, 9, 10)
+    kmax = limits(hx0, 'x', 0, 9, kk)[1]
+    xs_ = np.linspace(0, kmax, 10)
     hx0.plot(xs_, slope * xs_, color=GREY, lw=0.7, ls=(0, (3, 2)))
-    hx0.set_xlim(0, 9); hx0.set_ylim(0, 0.11)
+    limits(hx0, 'y', 0, 0.11, cc)
     hx0.set_xlabel('Tuning strength (Hz)'); hx0.set_ylabel('Calibrated gain c')
     gm_ = syn.groupby('level').gain_c.mean()
     g = m['gains']
-    labels(hx0, [(f"Recovered c: {gm_['weak']:.3f}, {gm_['medium']:.3f}, {gm_['strong']:.3f}", C_RO),
-                 (f"Model c: {g['rand 20']:.3f}, {g['all']:.3f}, {g['top 20']:.3f}", INK), ('Dashed: proportional fit', GREY)],
+    labels(hx0, [('Recovered c: ' + ', '.join(f'{gm_[lv]:.3f}' for lv in LV), C_RO),
+                 ('Model c: ' + ', '.join(f'{g[lab]:.3f}' for lab in targets.values()), INK), ('Dashed: proportional fit', GREY)],
            0.03, 0.98, 0.11)
     letter(hx0, 'g', x=-0.36, y=1.02)
 
