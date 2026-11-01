@@ -58,5 +58,5 @@ python scripts/spiking.py           # network simulations, ~2 h
 python scripts/fit.py               # refits of both models, ~2 h per run (the figures use the published fits)
 ```
 
-The notebooks only need `results/`, which is committed. `BUGS.md` lists the differences from the code that produced
-the submitted figures and the problems found while refactoring.
+The notebooks only need `results/`, which is committed. `BUGS.md` lists the inconsistencies kept in the code, the paper statements the repository cannot reproduce,
+and the checks against the original code.

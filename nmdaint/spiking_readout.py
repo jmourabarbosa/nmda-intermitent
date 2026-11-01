@@ -3,7 +3,7 @@
 Recorded cells: spike counts in 100 ms windows every 10 ms. For each cue and its opposite cue (4 pairs) and each
 time point, decoder.quadratic_loo (lam = 10,000, on counts) gives leave-one-out confidences of the true cue, with
 the true labels and 30 label shuffles; the true confidence is z-scored against the mean and SD of the shuffles over
-trials and shuffles of the pair at each time point (BUGS.md: the recordings use each trial's own shuffles). On
+trials and shuffles of the pair at each time point (the recordings use each trial's own shuffles). On
 threshold: 95th percentile of the cluster masses of the shuffles' z (onoff.null_threshold); Off below 0.84.
 Correct trials only (memory held).
 """
