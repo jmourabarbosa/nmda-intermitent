@@ -111,7 +111,6 @@ class Session:
         self.name, self.opp, self.cue_ang = s['name'], s['opp'], s['cue_ang']
         self.trial_index = np.flatnonzero(s['correct'])
         self.error_index = np.flatnonzero(~s['correct'])
-        self.n_trials_all = len(s['correct'])
         self.t, R = rates(s, s['correct'])
         _, Re = rates(s, ~s['correct'])
         self.cue, self.cue_err = s['cue'][s['correct']], s['cue'][~s['correct']]

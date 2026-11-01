@@ -26,17 +26,12 @@ A2. **The model fits.** At the published parameters, the archived best losses (`
      5.5/s, 212 ms, 0.39). Seeds 1 and 2 (stopped by a container restart after ~550 evaluations) had already found
      exactly the archived best parameters of their seeds, so the STP fit code reproduces those runs, but not seed 0.
    The figures use the published parameters (`ratemodel.FIT`).
-A3. **Figure 3b and the behavioural statistics: which GLMM.** The Methods give the model as
-   `error ~ z(stat) + t + t² + monkey + (1 + z(stat) || session)`, but the code behind the plotted effects and stars
-   (and `behaviour.glmm_single`) has no time-in-session terms. Numbers in the paper that come from the model with
-   time terms (`time_covariate_check.csv`, `time_terms = t`) or that the repository does not compute:
-   - caption, Off length p = 7×10⁻⁵ and number of Off states p = 0.89: without time terms 1.1×10⁻⁴ and 0.78 (total
-     Off and On time agree);
-   - Results, total Off time β = 0.32 (95% CI 0.20–0.43): without time terms 0.31 (0.20–0.42);
-   - Results, per monkey β = 0.48 (H, p = 1×10⁻⁴), 0.52 (J, p = 0.005), 0.10 (A, p = 0.13): without time terms
-     0.44 (p = 1×10⁻⁴), 0.55 (p = 0.005), 0.11 (p = 0.11) (`glmm_single` on each monkey's trials; the Fig. 3
-     notebook's `MONKEYS`).
-   Either add the time terms to `glmm_single` (and the figure changes slightly) or describe the model without them.
+A3. **Behavioural statistics (Fig. 3b and Results).** The paper's GLMM numbers, its Methods formula and its Fig. 3b
+   PNG came from an earlier variant of the model, not the one in the committed Fig. 3b script. The committed model is
+   kept (`behaviour.glmm_single`) and the paper was changed to it: Methods formula; total Off time β = 0.31 (95% CI
+   0.20–0.42), p = 1×10⁻⁵ (was 0.32, 0.20–0.43); per monkey β = 0.44 (H, p = 1×10⁻⁴), 0.55 (J, p = 0.005), 0.11 (A, p
+   = 0.11) (was 0.48, 0.52, 0.10 with p = 0.13); caption, Off length p = 1×10⁻⁴ (was 7×10⁻⁵), number of Off states p =
+   0.78 (was 0.89). The Fig. 3 notebook prints all of them.
 A4. **Figure 4b.** Its histograms came from a separate re-simulation of sessions 0-3
    (`paper/scripts/spiking_topbottom.py`), whose decoders drew different label shuffles from the main simulation of
    the same trials. The new code uses sessions 0-3 of the main simulation: 2.99 Off and 3.44 On states per trial
@@ -118,5 +113,5 @@ D2. **Fig. 2: "quantitatively predicts the shift".** The model gets the directio
 | synthetic validation, 24 sessions | `readout_suppl_handoff/data/synthetic_sessions.csv` | identical |
 
 Figures, against `paper/figures/` (the versions in the Google Doc): Figs. 2, S1, S2 and S3 pixel-identical; Fig. 3
-identical to the original script run on the committed data (the paper's PNG shows sub-pixel shifts of the session
-dots, from an earlier GLMM table); Fig. 1 differs as in A1 (High-gain counts) and Fig. 4b as in A4.
+identical to the original script run on the committed data (the paper's PNG, made with the earlier model variant
+of A3, shows sub-pixel shifts of the session dots); Fig. 1 differs as in A1 (High-gain counts) and Fig. 4b as in A4.

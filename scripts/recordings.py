@@ -53,7 +53,7 @@ def run_session(path):
     _, st_err = S.states(S.error_confidence())
     trials = []
     for idx, dst, correct in ((S.trial_index, dstate, 1), (S.error_index, st_err[:, S.delay[S.sw]], 0)):
-        trials.append(pd.DataFrame(dict(session=S.name, trial_index=idx, t_frac=idx / (S.n_trials_all - 1),
+        trials.append(pd.DataFrame(dict(session=S.name, trial_index=idx,
                                         correct=correct, **onoff.trial_stats(dst))))
     res['trials'] = pd.concat(trials).sort_values('trial_index')
     # population geometry: states from all units of one half of the units, activity of the other half
