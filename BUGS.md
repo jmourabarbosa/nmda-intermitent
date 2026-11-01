@@ -7,13 +7,13 @@ stated below (checks in the final section).
 
 ## A. Results that the original code does not reproduce
 
-1. **Figure 1 (example trial and "High, 3.0/trial").** The committed `paper_model/make_figures.py` (commit 92a4f33,
+A1. **Figure 1 (example trial and "High, 3.0/trial").** The committed `paper_model/make_figures.py` (commit 92a4f33,
    the commit of the paper's PNG) selects simulated trial 56 as the example; the paper shows trial 226 of the same
    simulation (identical traces and states). Its panel b gives 3.08 On states per trial at high gain ("3.1"), the
    paper says 3.0, and the high-gain bars differ slightly. The PNG was apparently made with an uncommitted variant.
    The new code takes the example trial explicitly (226, `scripts/ratemodel.py`, `EXAMPLE`); the numbers come from
    the code (3.1).
-2. **The model fits.** At the published parameters, the archived best losses (`session-archive`,
+A2. **The model fits.** At the published parameters, the archived best losses (`session-archive`,
    `archive/fits/fits_one/all_run0`: 8.99 for the NMDA model; `fits_fac/run0`: 9.23 for the STP model) are not
    what the current fit code computes (9.43 and 9.05). The published parameters therefore come from an earlier
    version of the loss or of the data table, and a refit with the current code will not return them.
@@ -26,48 +26,84 @@ stated below (checks in the final section).
      5.5/s, 212 ms, 0.39). Seeds 1 and 2 (stopped by a container restart after ~550 evaluations) had already found
      exactly the archived best parameters of their seeds, so the STP fit code reproduces those runs, but not seed 0.
    The figures use the published parameters (`ratemodel.FIT`).
-3. **Figure 3b caption.** The p values in the caption for Off length (7×10⁻⁵) and number of Off states (0.89) are
-   those of the GLMM with a time-in-session covariate (`time_covariate_check.csv`, `time_terms = t`); the plotted
-   effects and stars come from the model without it, which gives p = 1.1×10⁻⁴ and 0.78 (total Off and On time agree).
-4. **Figure 4b.** Its histograms came from a separate re-simulation of sessions 0-3
+A3. **Figure 3b and the behavioural statistics: which GLMM.** The Methods give the model as
+   `error ~ z(stat) + t + t² + monkey + (1 + z(stat) || session)`, but the code behind the plotted effects and stars
+   (and `behaviour.glmm_single`) has no time-in-session terms. Numbers in the paper that come from the model with
+   time terms (`time_covariate_check.csv`, `time_terms = t`) or that the repository does not compute:
+   - caption, Off length p = 7×10⁻⁵ and number of Off states p = 0.89: without time terms 1.1×10⁻⁴ and 0.78 (total
+     Off and On time agree);
+   - Results, total Off time β = 0.32 (95% CI 0.20–0.43): without time terms 0.31 (0.20–0.42);
+   - Results, per monkey β = 0.48 (H, p = 1×10⁻⁴), 0.52 (J, p = 0.005), 0.10 (A, p = 0.13): without time terms
+     0.44 (p = 1×10⁻⁴), 0.55 (p = 0.005), 0.11 (p = 0.11) (`glmm_single` on each monkey's trials; the Fig. 3
+     notebook's `MONKEYS`).
+   Either add the time terms to `glmm_single` (and the figure changes slightly) or describe the model without them.
+A4. **Figure 4b.** Its histograms came from a separate re-simulation of sessions 0-3
    (`paper/scripts/spiking_topbottom.py`), whose decoders drew different label shuffles from the main simulation of
    the same trials. The new code uses sessions 0-3 of the main simulation: 2.99 Off and 3.44 On states per trial
    (paper 2.98 and 3.42; same labels at one decimal), bars differing by a few states.
+A5. **Methods, "loss 9.7 for the NMDA model and 10.4 for the STP model, on 2,112 trials".** Not reproduced. The
+   all-units loss at the published parameters, in the evaluation behind Figs. 2 and S3 (2,112 trials, seed 1), is
+   9.87 (NMDA) and 9.83 (STP); with seeds 2 and 3, 9.97 and 9.61 (NMDA), 9.53 and 9.04 (STP). The evaluation noise
+   (about ±0.4) is larger than the difference, and the STP model is not worse on this decoder. Summed over the seven
+   populations (Supplementary Fig. 3h), NMDA 74 and STP 79 (seed 1). "About equally well" holds; the two numbers
+   should be replaced, e.g. by the Fig. S3h sums.
 
 ## B. Inconsistencies in the methods (kept, so that the published numbers are unchanged; your decision)
 
-5. **Three gains for the same read-out.** The all-units gain of the fitted model was calibrated three times with
+B1. **Three gains for the same read-out.** The all-units gain of the fitted model was calibrated three times with
    different simulations: 0.0512 (Fig. 2, 2,112 trials), 0.0487 (tau sweep behind Fig. 3c, d, 1,056 trials, seed 0)
    and 0.0510 (Supplementary Fig. 1, 1,056 trials, seed 11, other grid). The new code keeps all three so that the figures
    are unchanged (`scripts/ratemodel.py`, `readout_example`; `memory.reference_gain`). With the single gain 0.0512,
    Supplementary Fig. 1c would read "model 2.21" instead of 2.20 and Fig. 3c, d would change slightly.
-6. **Off threshold.** The recordings use z < 0.8416 (P > 0.20 exactly); the rate model and the spiking network use
+B2. **Off threshold.** The recordings use z < 0.8416 (P > 0.20 exactly); the rate model and the spiking network use
    z < 0.84 (`recordings.OFF_Z`, `onoff.OFF_Z`).
-7. **The spiking network is not decoded exactly like the recordings**, although the Methods say so:
+B3. **The spiking network is not decoded exactly like the recordings**, although the Methods say so:
    (a) the decoder is fitted on raw spike counts (the data: rates z-scored across trials), with the quadratic
    approximation of the logistic loss (close at lambda = 10,000); (b) its z is taken against the shuffles pooled over
    all trials of a cue pair (the data: each trial against its own shuffles); (c) its On threshold pools the cluster
    masses of all null traces (the data: each trial's shuffles, the maximum mass per shuffle).
-8. **State-length histograms.** The data's table puts states of exactly 600 ms in the 580-600 ms bin, the model in
+B4. **State-length histograms.** The data's table puts states of exactly 600 ms in the 580-600 ms bin, the model in
    the >= 600 ms bin (enters the fit loss).
-9. **Fit conditions.** The STP model was fitted with 1 s before the cue and a penalty on spontaneous activity; the
+B5. **Fit conditions.** The STP model was fitted with 1 s before the cue and a penalty on spontaneous activity; the
    NMDA model with 300 ms and no such penalty. Both are evaluated with 300 ms.
-10. **Read-out noise shares** `RHO` (0.09 top, 0.11 random, 0.35 all units) are typed in, not computed; they are the
+B6. **Read-out noise shares** `RHO` (0.09 top, 0.11 random, 0.35 all units) are typed in, not computed; they are the
     data's pre-cue z autocorrelation at 200 ms (the Fig. S1 notebook prints the recomputed values).
-11. **Pre-cue window.** Recordings: window centres -400 to -10 ms; network: -400 to -50 ms (the model's cue drives
+B7. **Pre-cue window.** Recordings: window centres -400 to -10 ms; network: -400 to -50 ms (the model's cue drives
     spikes within milliseconds; documented by the spiking agent).
-12. **Supplementary Fig. 1g** had the model gains ("0.029, 0.051, 0.088") typed into the figure script; they are now
+B8. **Supplementary Fig. 1g** had the model gains ("0.029, 0.051, 0.088") typed into the figure script; they are now
     read from the results.
 
 ## C. Other notes
 
-13. `paper/main.tex` (paper branch) is older than the Google Doc (different title, captions); the figures were
+C1. `paper/main.tex` (paper branch) is older than the Google Doc (different title, captions); the figures were
     compared with the images in the Google Doc.
-14. Removed as not used by the paper: unit sets other than all/top/random and the k values they need (still drawn,
+C2. Removed as not used by the paper: unit sets other than all/top/random and the k values they need (still drawn,
     since they fix the random sequence), the confidently-incorrect fraction, pre-cue false-On rates, CCG analysis,
     the network's response probe, overshoot and no-feed-forward model variants, the STP model with depression.
 
-## D. Checks of the refactored code against the original outputs
+## D. Caveats found by exploring the models (the notebooks' "Play" sections)
+
+Not errors in the code: results that qualify a statement of the current paper.
+
+D1. **Supplementary Fig. 2: noise alone gives most of the all-units Off states.** With no dips and the gain
+    recalibrated, the model has 2.37 Off states per trial for the all-units decoder (fitted model 3.10, data 3.25),
+    and 3.95–4.77 for the random populations (data 4.27–4.80). Only the top-unit decoders separate the two (0.08–0.27
+    vs 3.15–3.50). The caption reports the top and random populations but not all units, the decoder the model is
+    fitted to and whose statistics the Results quote. The case for dips rests on the top-unit decoders and the fit
+    loss (313 vs 74), which is worth saying. In the Fig. S2 notebook's sweep (500 trials per depth), all-units Off
+    states rise only from 2.3 without dips to 3.1 at the fitted depth.
+D2. **Fig. 2: "quantitatively predicts the shift".** The model gets the direction and ordering, but for the top-unit
+    decoders it gives too few Off states (2.49–2.68 vs 3.15–3.50 per trial), too little Off time (0.24–0.27 vs
+    0.33–0.36 of the delay) and too long On states (median 150 vs 126–139 ms). The top-to-random shift in Off states
+    per trial is overestimated (k = 5: 1.99 vs 1.29 in the data; k = 20: 1.67 vs 1.40; k = 50: 1.23 vs 1.12). Visible
+    in Fig. 2; the word "quantitatively" may be too strong.
+D3. **The spiking network does not show the decoded-population effect.** Decoding random subsets of 20, 50 and 100
+    of the 330 sampled cells (session 0) gives 3.1–3.2 Off states per trial, like all 330 cells (Fig. 4 notebook): the
+    network's Off states are true silences locked to the dips, not decoder noise. The paper does not claim Fig. 2 for
+    the network, but the abstract says the main findings are replicated there and the Fig. 4e paragraph ties the
+    network's result to Fig. 2. One session, random cells only (no top-k ranking); a quick check, not an analysis.
+
+## E. Checks of the refactored code against the original outputs
 
 | step | compared with | result |
 |---|---|---|
