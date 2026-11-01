@@ -22,12 +22,10 @@ from numba import njit
 
 FIXED = dict(r_max=150.0, kappa=0.06, w_a=0.0141, beta=0.02, w_I=0.04, w_EI=0.5, w_ff=0.8, tau_ff=15.0, I_0=1.496,
              tau_r=10.0, tau_I=1.0, tau_xi=10.0, cue_amp=1.0, cue_dur=50.0, t_pre=300.0, t_delay=1600.0, dt=0.1,
-             U=0.3, tau_d=300.0)
+             U=0.3, tau_d=300.0, tau_N=150.0, tau_f=1500.0)       # slow time constants: NMDA gating, facilitation
 # fitted to the On/Off statistics of the all-units read-out (fit.py)
-FIT = dict(nmda=dict(tau_N=150.0, w_s=1.30, dip_rate=10.207, dip_mean=90.12, dip_shape=8.70, dip_depth=0.5987,
-                     sigma=0.0058),
-           stp=dict(tau_f=1500.0, w_s=0.6919, dip_rate=5.486, dip_mean=211.73, dip_shape=0.70, dip_depth=0.3936,
-                    sigma=0.0050))
+FIT = dict(nmda=dict(w_s=1.30, dip_rate=10.207, dip_mean=90.12, dip_shape=8.70, dip_depth=0.5987, sigma=0.0058),
+           stp=dict(w_s=0.6919, dip_rate=5.486, dip_mean=211.73, dip_shape=0.70, dip_depth=0.3936, sigma=0.0050))
 _KEYS = ('r_max', 'kappa', 'w_a', 'beta', 'w_I', 'w_EI', 'w_ff', 'tau_ff', 'I_0', 'tau_r', 'tau_I', 'cue_amp', 'dt',
          'w_s', 'sigma')
 

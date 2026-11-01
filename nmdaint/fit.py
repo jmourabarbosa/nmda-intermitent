@@ -1,9 +1,9 @@
 """CMA-ES fit of the rate model's dynamics (ratemodel.FIT) to the On/Off statistics of the all-units read-out.
 
 Loss (readout.loss on 792 simulated trials) + 2e4 x max(0, 0.98 - memory correct)^2, plus 10 x the squared
-distance outside the bounds. Seven parameters, scaled to [0, 1] within BOUNDS: the slow time constant (NMDA tau_N;
-for the STP model tau_f is fixed at 1.5 s), the recurrent strength w_s and the noise sigma, and the rate, mean
-length, gamma shape and depth of the dips. The STP model is fitted with 1 s before the cue and a penalty
+distance outside the bounds. Six parameters, scaled to [0, 1] within BOUNDS: the recurrent strength w_s, the noise
+sigma, and the rate, mean length, gamma shape and depth of the dips. The slow time constant is fixed (ratemodel.FIXED:
+NMDA tau_N = 150 ms, facilitation tau_f = 1.5 s). The STP model is fitted with 1 s before the cue and a penalty
 2e4 x max(0, P(spontaneous activity before the cue) - 0.02)^2, which excludes parameters where facilitation at
 rest ignites the pools without a cue.
 """
@@ -15,11 +15,11 @@ import numpy as np
 
 from . import ratemodel, readout
 
-BOUNDS = dict(nmda=dict(tau_N=(50.0, 150.0), w_s=(1.30, 1.70), dip_rate=(0.5, 12.0), dip_mean=(20.0, 300.0),
+BOUNDS = dict(nmda=dict(w_s=(1.30, 1.70), dip_rate=(0.5, 12.0), dip_mean=(20.0, 300.0),
                         dip_shape=(0.7, 10.0), dip_depth=(0.3, 1.0), sigma=(0.005, 0.04)),
               stp=dict(w_s=(0.5, 1.7), dip_rate=(0.5, 12.0), dip_mean=(20.0, 300.0), dip_shape=(0.7, 10.0),
                        dip_depth=(0.0, 1.0), sigma=(0.005, 0.04)))
-FIXED = dict(nmda={}, stp=dict(tau_f=1500.0, t_pre=1000.0))
+FIXED = dict(nmda={}, stp=dict(t_pre=1000.0))
 N_TRIALS = 792
 
 

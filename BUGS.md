@@ -34,6 +34,9 @@ C1. `paper/main.tex` (paper branch) is older than the Google Doc (different titl
 C2. Removed as not used by the paper: unit sets other than all/top/random and the k values they need (still drawn,
     since they fix the random sequence), the confidently-incorrect fraction, pre-cue false-On rates, CCG analysis,
     the network's response probe, overshoot and no-feed-forward model variants, the STP model with depression.
+C3. **tau_N is fixed at 150 ms** (`ratemodel.FIXED`; the fit has six free parameters, as the paper says). The published
+    NMDA parameters come from the original fit, in which tau_N also varied (50-150 ms) and settled at 150 ms. Refits
+    with tau_N fixed and w_s allowed down to 0.9 put w_s at 1.29-1.30 and fit no better on new trials (`scripts/fit.py`).
 
 ## D. Checks of the refactored code against the original outputs
 
