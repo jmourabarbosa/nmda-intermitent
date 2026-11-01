@@ -97,11 +97,6 @@ D2. **Fig. 2: "quantitatively predicts the shift".** The model gets the directio
     0.33–0.36 of the delay) and too long On states (median 150 vs 126–139 ms). The top-to-random shift in Off states
     per trial is overestimated (k = 5: 1.99 vs 1.29 in the data; k = 20: 1.67 vs 1.40; k = 50: 1.23 vs 1.12). Visible
     in Fig. 2; the word "quantitatively" may be too strong.
-D3. **The spiking network does not show the decoded-population effect.** Decoding random subsets of 20, 50 and 100
-    of the 330 sampled cells (session 0) gives 3.1–3.2 Off states per trial, like all 330 cells (Fig. 4 notebook): the
-    network's Off states are true silences locked to the dips, not decoder noise. The paper does not claim Fig. 2 for
-    the network, but the abstract says the main findings are replicated there and the Fig. 4e paragraph ties the
-    network's result to Fig. 2. One session, random cells only (no top-k ranking); a quick check, not an analysis.
 
 ## E. Checks of the refactored code against the original outputs
 
