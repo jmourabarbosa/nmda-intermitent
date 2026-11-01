@@ -11,8 +11,8 @@ A1. **Figure 1 (example trial and "High, 3.0/trial").** The committed `paper_mod
    the commit of the paper's PNG) selects simulated trial 56 as the example; the paper shows trial 226 of the same
    simulation (identical traces and states). Its panel b gives 3.08 On states per trial at high gain ("3.1"), the
    paper says 3.0, and the high-gain bars differ slightly. The PNG was apparently made with an uncommitted variant.
-   The new code takes the example trial explicitly (226, `scripts/ratemodel.py`, `EXAMPLE`); the numbers come from
-   the code (3.1).
+   The new code takes the example trial explicitly (226, `EXAMPLE_TRIAL` in the Fig. 1 notebook). Decision: keep the
+   code's numbers (3.1); the paper's Fig. 1 image is to be replaced by `figures/fig1.png` (the text quotes no count).
 A2. **The model fits.** At the published parameters, the archived best losses (`session-archive`,
    `archive/fits/fits_one/all_run0`: 8.99 for the NMDA model; `fits_fac/run0`: 9.23 for the STP model) are not
    what the current fit code computes (9.43 and 9.05). The published parameters therefore come from an earlier
@@ -25,7 +25,8 @@ A2. **The model fits.** At the published parameters, the archived best losses (`
    - STP: seed 0 reaches 8.96 (w_s 0.69, dips 4.7/s, 260 ms, depth 0.32; published, from the archived seed 0: 0.69,
      5.5/s, 212 ms, 0.39). Seeds 1 and 2 (stopped by a container restart after ~550 evaluations) had already found
      exactly the archived best parameters of their seeds, so the STP fit code reproduces those runs, but not seed 0.
-   The figures use the published parameters (`ratemodel.FIT`).
+   Decision: keep the published parameters (`ratemodel.FIT`), which all figures use; the Methods now call them
+   "Fitted parameters" instead of "Best fit", since they are not the optimum of the loss the Methods describe.
 A3. **Behavioural statistics (Fig. 3b and Results).** The paper's GLMM numbers, its Methods formula and its Fig. 3b
    PNG came from an earlier variant of the model, not the one in the committed Fig. 3b script. The committed model is
    kept (`behaviour.glmm_single`) and the paper was changed to it: Methods formula; total Off time β = 0.31 (95% CI
@@ -40,8 +41,8 @@ A5. **Methods, "loss 9.7 for the NMDA model and 10.4 for the STP model, on 2,112
    all-units loss at the published parameters, in the evaluation behind Figs. 2 and S3 (2,112 trials, seed 1), is
    9.87 (NMDA) and 9.83 (STP); with seeds 2 and 3, 9.97 and 9.61 (NMDA), 9.53 and 9.04 (STP). The evaluation noise
    (about ±0.4) is larger than the difference, and the STP model is not worse on this decoder. Summed over the seven
-   populations (Supplementary Fig. 3h), NMDA 74 and STP 79 (seed 1). "About equally well" holds; the two numbers
-   should be replaced, e.g. by the Fig. S3h sums.
+   populations (Supplementary Fig. 3h), NMDA 74 and STP 79 (seed 1). Changed in the paper to these values (9.9 and
+   9.8 on the all-units decoder, 74 and 79 summed).
 
 ## B. Inconsistencies in the methods (kept, so that the published numbers are unchanged; your decision)
 
