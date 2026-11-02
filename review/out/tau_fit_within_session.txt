@@ -1,9 +1,9 @@
-  subset     n   err  tau_pooled       pooled_ci  tau_session_p0   session_p0_ci  lr_vs_no_effect
-     all 15468 0.147         123  (118.0, 131.0)             158  (147.0, 169.0)          3686.83
-monkey A  5956 0.089         165 (143.0, 1092.0)             151 (136.0, 1061.0)          1562.39
-monkey H  5974 0.282          79    (76.0, 84.0)              80    (77.0, 85.0)           207.84
-monkey J  3538 0.018         185  (169.0, 202.0)             185  (172.0, 199.0)          2092.18
-note: tau at the grid edge (20 or 1500 ms) means no finite tau is preferred; lr_vs_no_effect compares best tau to tau=1500 ms
+  subset     n   err  tau_pooled       pooled_ci  tau_session_p0   session_p0_ci  lr_vs_flat
+     all 15468 0.147         123  (118.0, 131.0)             158  (147.0, 169.0)        67.0
+monkey A  5956 0.089         165 (143.0, 1092.0)             151 (136.0, 1061.0)         8.8
+monkey H  5974 0.282          79    (76.0, 84.0)              80    (77.0, 85.0)       213.3
+monkey J  3538 0.018         185  (169.0, 202.0)             185  (172.0, 199.0)        20.5
+note: the sweep is not monotonic in tau: P(held) ~ 1 for tau = 200-750 ms but the model fails (P(held) ~ 0.67 in every bin) at tau = 1,500 ms, so the curve family contains no working long-trace model; lr_vs_flat: session-p0 fit vs constant
 
 between sessions: error rate vs mean Off fraction, Spearman rho = -0.34, p = 0.100
           err  frac_off

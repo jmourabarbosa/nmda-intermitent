@@ -34,6 +34,12 @@ def counts(d):
             np.array([np.bincount(b[s == x], minlength=behaviour.NB) for x in names]))
 
 
+def ll_flat(ks, ns):
+    k, n = ks.sum(1), ns.sum(1)
+    p = np.clip(k / n, 1e-9, 1 - 1e-9)
+    return float((k * np.log(p) + (n - k) * np.log(1 - p)).sum())
+
+
 def ci_from_ll(ll):
     """profile-likelihood 95% interval (drop of 1.92)"""
     ok = fine[ll >= ll.max() - 1.92]
@@ -49,9 +55,10 @@ for name, d in [('all', trials)] + [(f'monkey {m}', g) for m, g in trials.groupb
     out.append(dict(subset=name, n=len(d), err=round(1 - d.correct.mean(), 3),
                     tau_pooled=round(fine[i]), pooled_ci=tuple(np.round(ci_from_ll(llp))),
                     tau_session_p0=round(fine[np.argmax(lls)]), session_p0_ci=tuple(np.round(ci_from_ll(lls))),
-                    lr_vs_no_effect=round(2 * (lls.max() - lls[-1]), 2)))   # tau=1500 ~ no Off dependence
+                    lr_vs_flat=round(2 * (lls.max() - ll_flat(ks, ns)), 1)))   # flat = P(correct) constant per session
 print(pd.DataFrame(out).to_string(index=False))
-print('note: tau at the grid edge (20 or 1500 ms) means no finite tau is preferred; lr_vs_no_effect compares best tau to tau=1500 ms')
+print('note: the sweep is not monotonic in tau: P(held) ~ 1 for tau = 200-750 ms but the model fails (P(held) ~ 0.67 in every'
+      ' bin) at tau = 1,500 ms, so the curve family contains no working long-trace model; lr_vs_flat: session-p0 fit vs constant')
 
 g = trials.groupby('session').agg(err=('correct', lambda c: 1 - c.mean()), frac_off=('frac_off', 'mean'), monkey=('monkey', 'first'))
 r = spearmanr(g.err, g.frac_off)
