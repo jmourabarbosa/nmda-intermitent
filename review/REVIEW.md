@@ -32,6 +32,9 @@ the proposed mechanism from its alternatives**:
   the fitted model. The shift follows from the read-out (z = c dr + eta with c calibrated per population), not
   from the dynamics. The calibration target itself depends on Off frequency (mu_on falls from 4.1 to 1.2 as the dip
   rate rises at a fixed gain).
+* **Real data.** Error trials are already decoded worse at the cue-response peak (100-400 ms, z 2.31 vs 2.58,
+  p = 0.001, 25 sessions), before any silence could outlast an NMDA trace. Part of the error-Off association is
+  therefore not caused by Off states.
 * **Fig. 3a.** The "memory lost from 400 ms" cut-off is set by the scoring rule. After a 500 ms silence, a modest
   response-period input still restarts the *correct* pool in 100% of trials (90% at 600 ms, >50% at 1 s).
 
@@ -160,9 +163,8 @@ session structure (25 sessions, trial counts, monkeys, error rates), and states 
 4. **Small effect.** P(correct) falls from 0.88 to 0.79 across Off bins, and trials without any Off state still
    have 11% errors (vs 15% with Off). Most errors do not depend on Off time; p0 = 0.887 absorbs them.
 
-*Data test of reverse causality* (`review/data_error_timecourse.py` → `out/data_error_timecourse.txt`). Are
-error trials already decoded worse 100-400 ms after the cue, before any Off state could have erased a 120-150 ms
-trace? See "Real-data error time course" below.
+*Data test of reverse causality.* Error trials are already decoded worse 100-400 ms after the cue (p = 0.001),
+before any Off state could have erased a 120-150 ms trace. See "Real-data error time course" below.
 
 *Code notes.* Error trials are decoded with decoders fitted on all correct trials and z-scored with the
 correct-trial mean and SD, while correct trials use leave-one-out. Both are out of sample, but any global rate
@@ -255,7 +257,26 @@ control.
 
 ## Real-data error time course
 
-(Filled in from `out/data_error_timecourse.txt` when the run finishes.)
+`review/data_error_timecourse.py` → `out/data_error_timecourse.{txt,csv,npz}`, plot `out/data_error_timecourse.png`
+(`plot_error_timecourse.py`). The all-units decoder is run exactly as in `scripts/recordings.py`, for all 25 sessions.
+
+| window | correct z | error z | Wilcoxon over sessions |
+|---|---|---|---|
+| pre-cue (-400 to -10 ms) | -0.004 | 0.039 | p = 0.21 (no offset: the error-trial z-scoring is not biased) |
+| **early, 100-400 ms** | 2.58 | 2.31 | **p = 0.0013** (median error/correct ratio 0.885) |
+| delay, 500-1,400 ms | 1.01 | 0.64 | p = 5e-5 (ratio 0.624) |
+
+![error time course](out/data_error_timecourse.png)
+
+* Error trials are already decoded worse at the **peak of the cue response (~150 ms)**, and their P(Off) is
+  already higher by 250-400 ms. That is before any silence could have outlasted a 120-150 ms trace (the single-dip
+  test needs about 400 ms). Part of the error-Off association therefore comes from what happened at encoding or
+  from engagement, and not from Off states erasing a trace.
+* The divergence then grows through the delay (ratio 0.885 → 0.62). This is also consistent with a delay-period
+  loss, so the data are a *mixture*.
+* So the Fig. 3 claim needs this decomposition. Add early decoding strength (100-400 ms z) as a trial-level
+  covariate in the GLMM and in the tau fit, or restrict the analysis to error trials with normal encoding. The
+  synthetic worlds above show how much a few percent of encoding failures shift the tau estimate.
 
 ## Files
 
@@ -269,7 +290,7 @@ control.
 | `synth_single_dip_probe.py` | Fig. 3a with a response-period probe | `out/synth_single_dip_probe.{txt,csv}` |
 | `synth_readout_generic.py` | Fig. 2 calibration leakage and specificity | `out/synth_readout_generic.txt`, `out/synth_readout_*.csv` |
 | `synth_population.py` | Fig. 4e on a truly silent ground truth | `out/synth_population.{txt,csv}` |
-| `data_error_timecourse.py` | when error trials diverge (real data) | `out/data_error_timecourse.{txt,csv,npz}` |
+| `data_error_timecourse.py`, `plot_error_timecourse.py` | when error trials diverge (real data) | `out/data_error_timecourse.{txt,csv,npz,png}` |
 | `common.py` | shared helpers | |
 
 Run from the repository root after `pip install -e .`, e.g. `python review/synth_behaviour.py`. Times on 4 cores:
