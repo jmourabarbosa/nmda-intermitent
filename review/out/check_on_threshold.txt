@@ -1,0 +1,8 @@
+rho 0.09: threshold all clusters 19.3  vs  max-per-trace 21.9
+rho 0.35: threshold all clusters 24.0  vs  max-per-trace 23.2
+all units          paper-threshold  max-threshold  data
+  n_on              1.860          1.921    2.103
+  frac_on           0.183          0.185    0.211
+  on_median       140.000        140.000  133.600
+  n_off             3.130          3.130    3.254
+loss (all units): paper threshold 9.22  max threshold 8.54

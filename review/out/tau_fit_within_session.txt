@@ -1,0 +1,16 @@
+  subset     n   err  tau_pooled       pooled_ci  tau_session_p0   session_p0_ci  lr_vs_no_effect
+     all 15468 0.147         123  (118.0, 131.0)             158  (147.0, 169.0)          3686.83
+monkey A  5956 0.089         165 (143.0, 1092.0)             151 (136.0, 1061.0)          1562.39
+monkey H  5974 0.282          79    (76.0, 84.0)              80    (77.0, 85.0)           207.84
+monkey J  3538 0.018         185  (169.0, 202.0)             185  (172.0, 199.0)          2092.18
+note: tau at the grid edge (20 or 1500 ms) means no finite tau is preferred; lr_vs_no_effect compares best tau to tau=1500 ms
+
+between sessions: error rate vs mean Off fraction, Spearman rho = -0.34, p = 0.100
+          err  frac_off
+monkey                 
+A       0.089     0.428
+H       0.281     0.420
+J       0.018     0.552
+
+within-session (demeaned) P(correct) per Off bin: [ 0.056  0.027  0.021  0.014  0.005 -0.013 -0.012 -0.037 -0.06  -0.068]
+pooled P(correct) per Off bin:                [0.883 0.866 0.877 0.874 0.869 0.854 0.858 0.827 0.788 0.788]
