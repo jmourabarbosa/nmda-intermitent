@@ -1,0 +1,22 @@
+103 functions, 133 call edges; figures: fig1, fig2, fig3, fig4, figS1, figS2, figS3
+
+fig1: ratemodel.params -> readout.load_data -> readout.evaluate -> readout.rate_diff -> readout.null_threshold -> onoff.label -> onoff.stats -> ratemodel.simulate -> readout.noise -> ratemodel.memory_correct -> plots.fig1.draw -> ratemodel.memory_trace*
+   loads: {'recordings/readout_per_session.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_histograms.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}
+
+fig2: ratemodel.params -> readout.load_data -> readout.evaluate -> readout.summary -> plots.fig2.draw -> recordings.Session()*
+   loads: {'recordings/readout_per_session.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_histograms.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}
+
+fig3: ratemodel.params -> memory.single_dip -> ratemodel.single_dip -> ratemodel.simulate -> ratemodel.memory_trace -> behaviour.glmm_single -> readout.load_data -> memory.reference_gain -> memory.tau_sweep -> behaviour.bins -> behaviour.held_curves -> behaviour.fit_tau -> plots.fig3.draw
+   loads: {'recordings/per_trial.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'ratemodel/tau_sweep.csv': {'optional': False, 'written_by': 'scripts.tau_sweep.main'}, 'recordings/readout_per_session.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_histograms.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}
+
+fig4: spiking_readout.windows -> spiking_readout.states -> spiking_readout.read_session -> spiking_readout.tuning -> population.unit_halves -> spiking_readout.zscore -> population.analyse -> plots.fig4.draw
+   loads: {"spiking/sessions/name + '.npz'": {'optional': False, 'written_by': 'scripts.spiking.save'}, 'spiking/example_raster.npz': {'optional': False, 'written_by': 'scripts.spiking.main'}, 'recordings/procrustes.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/pca_plane.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}
+
+figS1: ratemodel.params -> readout.load_data -> ratemodel.simulate -> readout.rate_diff -> readout.noise -> readout.gain_curve -> readout.gain_for -> readout.null_threshold -> onoff.label -> onoff.mu_on -> synthetic.session -> readout.evaluate -> plots.figS1.draw
+   loads: {'recordings/precue_acf.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/example_delay_z.npz': {'optional': True, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_per_session.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_histograms.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}
+
+figS2: ratemodel.params -> readout.load_data -> readout.evaluate -> ratemodel.simulate -> readout.summary -> plots.figS2.draw
+   loads: {'recordings/readout_per_session.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_histograms.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}
+
+figS3: ratemodel.params -> ratemodel.simulate -> readout.load_data -> readout.evaluate -> readout.summary -> plots.figS3.draw
+   loads: {'recordings/readout_per_session.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}, 'recordings/readout_histograms.csv': {'optional': False, 'written_by': 'scripts.recordings.main'}}

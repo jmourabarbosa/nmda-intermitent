@@ -292,6 +292,8 @@ control.
 | `synth_population.py` | Fig. 4e on a truly silent ground truth | `out/synth_population.{txt,csv}` |
 | `data_error_timecourse.py`, `plot_error_timecourse.py` | when error trials diverge (real data) | `out/data_error_timecourse.{txt,csv,npz,png}` |
 | `common.py` | shared helpers | |
+| `callgraph.py` | static call graphs: all functions, per module, per figure (Appendices A-B of the PDF) | `out/callgraph/*.{svg,png,dot}`, `out/callgraph/calls.json` |
+| `build_pdf.py` | this review as a PDF with the call-graph appendices | `REVIEW.pdf` |
 
 Run from the repository root after `pip install -e .`, e.g. `python review/synth_behaviour.py`. Times on 4 cores:
 the checks take seconds; the synthetic scripts take 5-20 min each; the data time course takes about 1 h (it needs

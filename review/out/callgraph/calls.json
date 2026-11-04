@@ -1,0 +1,794 @@
+{
+ "edges": {
+  "behaviour.GLMM.fit": [
+   "behaviour.GLMM.loglik"
+  ],
+  "behaviour.GLMM.loglik": [
+   "behaviour._session_ll"
+  ],
+  "behaviour.GLMM.session_effects": [
+   "behaviour._session_ll"
+  ],
+  "behaviour.fit_tau": [
+   "behaviour.best_tau",
+   "behaviour.bins"
+  ],
+  "behaviour.glmm_single": [
+   "behaviour.GLMM()",
+   "behaviour.GLMM.session_effects",
+   "behaviour.zscore_within"
+  ],
+  "fit.fit": [
+   "fit.objective"
+  ],
+  "fit.objective": [
+   "ratemodel.params",
+   "readout.evaluate",
+   "readout.loss"
+  ],
+  "memory.reference_gain": [
+   "readout.evaluate"
+  ],
+  "memory.single_dip": [
+   "ratemodel.memory_correct",
+   "ratemodel.simulate",
+   "ratemodel.single_dip"
+  ],
+  "memory.tau_sweep": [
+   "onoff.label",
+   "ratemodel.memory_correct",
+   "ratemodel.simulate",
+   "readout.noise",
+   "readout.null_threshold",
+   "readout.rate_diff"
+  ],
+  "onoff.label": [
+   "onoff.runs"
+  ],
+  "onoff.null_threshold": [
+   "onoff.runs"
+  ],
+  "onoff.stats": [
+   "onoff.runs"
+  ],
+  "onoff.trial_stats": [
+   "onoff.runs"
+  ],
+  "population.analyse": [
+   "population.normalised",
+   "population.project",
+   "population.ring_and_centroids",
+   "population.shape_similarity",
+   "population.trial_halves"
+  ],
+  "population.project": [
+   "population._rotation"
+  ],
+  "population.shape_similarity": [
+   "population.trial_vectors"
+  ],
+  "ratemodel.common_input": [
+   "ratemodel.smooth_ramps"
+  ],
+  "ratemodel.memory_correct": [
+   "ratemodel.memory_trace"
+  ],
+  "ratemodel.simulate": [
+   "ratemodel._ou",
+   "ratemodel._sim",
+   "ratemodel.common_input"
+  ],
+  "ratemodel.single_dip": [
+   "ratemodel.smooth_ramps"
+  ],
+  "readout.evaluate": [
+   "onoff.label",
+   "onoff.stats",
+   "ratemodel.memory_correct",
+   "ratemodel.simulate",
+   "readout.gain_curve",
+   "readout.gain_for",
+   "readout.noise",
+   "readout.null_threshold",
+   "readout.rate_diff"
+  ],
+  "readout.gain_curve": [
+   "onoff.mu_on"
+  ],
+  "readout.load_data": [
+   "paths.results"
+  ],
+  "readout.null_threshold": [
+   "onoff.null_threshold",
+   "readout.noise"
+  ],
+  "readout.summary": [
+   "readout.loss"
+  ],
+  "recordings.Session()": [
+   "recordings.Session.unit_sets",
+   "recordings.load",
+   "recordings.rates",
+   "recordings.trial_halves",
+   "recordings.zscore"
+  ],
+  "recordings.Session.confidence": [
+   "decoder.ridge_logistic_loo"
+  ],
+  "recordings.Session.error_confidence": [
+   "decoder.ridge_logistic_weights"
+  ],
+  "recordings.Session.readout_row": [
+   "onoff.mu_on",
+   "onoff.runs"
+  ],
+  "recordings.Session.states": [
+   "onoff.label",
+   "recordings.decoder_z",
+   "recordings.null_threshold"
+  ],
+  "recordings.null_threshold": [
+   "onoff.runs"
+  ],
+  "spiking.Network()": [
+   "spiking._stratified"
+  ],
+  "spiking.memory": [
+   "spiking._smooth"
+  ],
+  "spiking.session": [
+   "spiking.memory",
+   "spiking.simulate"
+  ],
+  "spiking.simulate": [
+   "spiking.Network.cue_current",
+   "spiking._kick",
+   "spiking._run",
+   "spiking.dips"
+  ],
+  "spiking_readout.decode": [
+   "decoder.quadratic_loo"
+  ],
+  "spiking_readout.read_session": [
+   "onoff.mu_on",
+   "onoff.stats",
+   "spiking_readout.states",
+   "spiking_readout.windows"
+  ],
+  "spiking_readout.states": [
+   "onoff.label",
+   "onoff.null_threshold",
+   "spiking_readout.decode"
+  ],
+  "spiking_readout.tuning": [
+   "onoff.label",
+   "onoff.null_threshold",
+   "spiking_readout.decode",
+   "spiking_readout.zscore"
+  ],
+  "synthetic.session": [
+   "decoder.ridge_logistic_loo",
+   "onoff.label",
+   "onoff.mu_on",
+   "onoff.stats",
+   "ratemodel.params",
+   "ratemodel.simulate",
+   "readout.gain_curve",
+   "readout.gain_for",
+   "readout.noise",
+   "readout.null_threshold",
+   "readout.rate_diff",
+   "recordings.decoder_z",
+   "recordings.null_threshold",
+   "recordings.zscore"
+  ],
+  "plots.fig1.draw": [],
+  "plots.fig2.draw": [],
+  "plots.fig3.draw": [
+   "behaviour.wilson"
+  ],
+  "plots.fig4.draw": [],
+  "plots.figS1.draw": [],
+  "plots.figS2.draw": [],
+  "plots.figS3.draw": [],
+  "scripts.fit.__main__": [
+   "fit.fit",
+   "paths.cache",
+   "readout.load_data"
+  ],
+  "scripts.recordings.__main__": [
+   "scripts.recordings.main"
+  ],
+  "scripts.recordings.main": [
+   "paths.results",
+   "recordings.monkey",
+   "scripts.recordings.run_session"
+  ],
+  "scripts.recordings.run_session": [
+   "onoff.trial_stats",
+   "paths.cache",
+   "population.analyse",
+   "population.unit_halves",
+   "recordings.Session()",
+   "recordings.Session.confidence",
+   "recordings.Session.error_confidence",
+   "recordings.Session.readout_row",
+   "recordings.Session.states",
+   "scripts.recordings.acf"
+  ],
+  "scripts.spiking.__main__": [
+   "scripts.spiking.main"
+  ],
+  "scripts.spiking.main": [
+   "paths.results",
+   "scripts.spiking.save",
+   "spiking.Network()",
+   "spiking.params",
+   "spiking.session",
+   "spiking.simulate"
+  ],
+  "scripts.spiking.save": [
+   "paths.results"
+  ],
+  "scripts.tau_sweep.__main__": [
+   "scripts.tau_sweep.main"
+  ],
+  "scripts.tau_sweep.main": [
+   "behaviour.bins",
+   "memory.reference_gain",
+   "memory.tau_sweep",
+   "paths.results",
+   "ratemodel.params",
+   "readout.load_data"
+  ]
+ },
+ "nodes": [
+  "behaviour.GLMM()",
+  "behaviour.GLMM.fit",
+  "behaviour.GLMM.loglik",
+  "behaviour.GLMM.session_effects",
+  "behaviour._session_ll",
+  "behaviour.best_tau",
+  "behaviour.bins",
+  "behaviour.fit_tau",
+  "behaviour.glmm_single",
+  "behaviour.held_curves",
+  "behaviour.wilson",
+  "behaviour.zscore_within",
+  "decoder.quadratic_loo",
+  "decoder.ridge_logistic_loo",
+  "decoder.ridge_logistic_weights",
+  "fit.fit",
+  "fit.objective",
+  "memory.reference_gain",
+  "memory.single_dip",
+  "memory.tau_sweep",
+  "onoff.label",
+  "onoff.mu_on",
+  "onoff.null_threshold",
+  "onoff.runs",
+  "onoff.stats",
+  "onoff.trial_stats",
+  "paths.cache",
+  "paths.results",
+  "population._rotation",
+  "population.analyse",
+  "population.normalised",
+  "population.project",
+  "population.ring_and_centroids",
+  "population.shape_similarity",
+  "population.trial_halves",
+  "population.trial_vectors",
+  "population.unit_halves",
+  "ratemodel._ou",
+  "ratemodel._sim",
+  "ratemodel.common_input",
+  "ratemodel.memory_correct",
+  "ratemodel.memory_trace",
+  "ratemodel.params",
+  "ratemodel.simulate",
+  "ratemodel.single_dip",
+  "ratemodel.smooth_ramps",
+  "readout.evaluate",
+  "readout.gain_curve",
+  "readout.gain_for",
+  "readout.load_data",
+  "readout.loss",
+  "readout.noise",
+  "readout.null_threshold",
+  "readout.rate_diff",
+  "readout.summary",
+  "recordings.Session()",
+  "recordings.Session.confidence",
+  "recordings.Session.error_confidence",
+  "recordings.Session.readout_row",
+  "recordings.Session.states",
+  "recordings.Session.unit_sets",
+  "recordings.decoder_z",
+  "recordings.load",
+  "recordings.monkey",
+  "recordings.null_threshold",
+  "recordings.rates",
+  "recordings.trial_halves",
+  "recordings.zscore",
+  "spiking.Network()",
+  "spiking.Network.cue_current",
+  "spiking._kick",
+  "spiking._run",
+  "spiking._smooth",
+  "spiking._stratified",
+  "spiking.dips",
+  "spiking.memory",
+  "spiking.params",
+  "spiking.session",
+  "spiking.simulate",
+  "spiking_readout.decode",
+  "spiking_readout.read_session",
+  "spiking_readout.states",
+  "spiking_readout.tuning",
+  "spiking_readout.windows",
+  "spiking_readout.zscore",
+  "synthetic.session",
+  "plots.fig1.draw",
+  "plots.fig2.draw",
+  "plots.fig3.draw",
+  "plots.fig4.draw",
+  "plots.figS1.draw",
+  "plots.figS2.draw",
+  "plots.figS3.draw",
+  "scripts.fit.__main__",
+  "scripts.recordings.__main__",
+  "scripts.recordings.acf",
+  "scripts.recordings.main",
+  "scripts.recordings.run_session",
+  "scripts.spiking.__main__",
+  "scripts.spiking.main",
+  "scripts.spiking.save",
+  "scripts.tau_sweep.__main__",
+  "scripts.tau_sweep.main"
+ ],
+ "figures": {
+  "fig1": {
+   "steps": [
+    {
+     "call": "ratemodel.params",
+     "cell": 3,
+     "optional": false
+    },
+    {
+     "call": "readout.load_data",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.evaluate",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.rate_diff",
+     "cell": 9,
+     "optional": false
+    },
+    {
+     "call": "readout.null_threshold",
+     "cell": 9,
+     "optional": false
+    },
+    {
+     "call": "onoff.label",
+     "cell": 9,
+     "optional": false
+    },
+    {
+     "call": "onoff.stats",
+     "cell": 9,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.simulate",
+     "cell": 12,
+     "optional": false
+    },
+    {
+     "call": "readout.noise",
+     "cell": 12,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.memory_correct",
+     "cell": 12,
+     "optional": false
+    },
+    {
+     "call": "plots.fig1.draw",
+     "cell": 16,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.memory_trace",
+     "cell": 14,
+     "optional": true
+    }
+   ],
+   "files": {
+    "recordings/readout_per_session.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_histograms.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  },
+  "fig2": {
+   "steps": [
+    {
+     "call": "ratemodel.params",
+     "cell": 3,
+     "optional": false
+    },
+    {
+     "call": "readout.load_data",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.evaluate",
+     "cell": 11,
+     "optional": false
+    },
+    {
+     "call": "readout.summary",
+     "cell": 11,
+     "optional": false
+    },
+    {
+     "call": "plots.fig2.draw",
+     "cell": 19,
+     "optional": false
+    },
+    {
+     "call": "recordings.Session()",
+     "cell": 21,
+     "optional": true
+    }
+   ],
+   "files": {
+    "recordings/readout_per_session.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_histograms.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  },
+  "fig3": {
+   "steps": [
+    {
+     "call": "ratemodel.params",
+     "cell": 3,
+     "optional": false
+    },
+    {
+     "call": "memory.single_dip",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.single_dip",
+     "cell": 7,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.simulate",
+     "cell": 7,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.memory_trace",
+     "cell": 7,
+     "optional": false
+    },
+    {
+     "call": "behaviour.glmm_single",
+     "cell": 11,
+     "optional": false
+    },
+    {
+     "call": "readout.load_data",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "memory.reference_gain",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "memory.tau_sweep",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "behaviour.bins",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "behaviour.held_curves",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "behaviour.fit_tau",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "plots.fig3.draw",
+     "cell": 21,
+     "optional": false
+    }
+   ],
+   "files": {
+    "recordings/per_trial.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "ratemodel/tau_sweep.csv": {
+     "optional": false,
+     "written_by": "scripts.tau_sweep.main"
+    },
+    "recordings/readout_per_session.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_histograms.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  },
+  "fig4": {
+   "steps": [
+    {
+     "call": "spiking_readout.windows",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "spiking_readout.states",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "spiking_readout.read_session",
+     "cell": 9,
+     "optional": false
+    },
+    {
+     "call": "spiking_readout.tuning",
+     "cell": 13,
+     "optional": false
+    },
+    {
+     "call": "population.unit_halves",
+     "cell": 16,
+     "optional": false
+    },
+    {
+     "call": "spiking_readout.zscore",
+     "cell": 16,
+     "optional": false
+    },
+    {
+     "call": "population.analyse",
+     "cell": 16,
+     "optional": false
+    },
+    {
+     "call": "plots.fig4.draw",
+     "cell": 19,
+     "optional": false
+    }
+   ],
+   "files": {
+    "spiking/sessions/name + '.npz'": {
+     "optional": false,
+     "written_by": "scripts.spiking.save"
+    },
+    "spiking/example_raster.npz": {
+     "optional": false,
+     "written_by": "scripts.spiking.main"
+    },
+    "recordings/procrustes.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/pca_plane.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  },
+  "figS1": {
+   "steps": [
+    {
+     "call": "ratemodel.params",
+     "cell": 3,
+     "optional": false
+    },
+    {
+     "call": "readout.load_data",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.simulate",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.rate_diff",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.noise",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.gain_curve",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.gain_for",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.null_threshold",
+     "cell": 8,
+     "optional": false
+    },
+    {
+     "call": "onoff.label",
+     "cell": 8,
+     "optional": false
+    },
+    {
+     "call": "onoff.mu_on",
+     "cell": 13,
+     "optional": false
+    },
+    {
+     "call": "synthetic.session",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "readout.evaluate",
+     "cell": 17,
+     "optional": false
+    },
+    {
+     "call": "plots.figS1.draw",
+     "cell": 21,
+     "optional": false
+    }
+   ],
+   "files": {
+    "recordings/precue_acf.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/example_delay_z.npz": {
+     "optional": true,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_per_session.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_histograms.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  },
+  "figS2": {
+   "steps": [
+    {
+     "call": "ratemodel.params",
+     "cell": 3,
+     "optional": false
+    },
+    {
+     "call": "readout.load_data",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.evaluate",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.simulate",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.summary",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "plots.figS2.draw",
+     "cell": 11,
+     "optional": false
+    }
+   ],
+   "files": {
+    "recordings/readout_per_session.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_histograms.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  },
+  "figS3": {
+   "steps": [
+    {
+     "call": "ratemodel.params",
+     "cell": 3,
+     "optional": false
+    },
+    {
+     "call": "ratemodel.simulate",
+     "cell": 5,
+     "optional": false
+    },
+    {
+     "call": "readout.load_data",
+     "cell": 6,
+     "optional": false
+    },
+    {
+     "call": "readout.evaluate",
+     "cell": 6,
+     "optional": false
+    },
+    {
+     "call": "readout.summary",
+     "cell": 6,
+     "optional": false
+    },
+    {
+     "call": "plots.figS3.draw",
+     "cell": 11,
+     "optional": false
+    }
+   ],
+   "files": {
+    "recordings/readout_per_session.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    },
+    "recordings/readout_histograms.csv": {
+     "optional": false,
+     "written_by": "scripts.recordings.main"
+    }
+   }
+  }
+ }
+}
