@@ -21,7 +21,7 @@ def stars(p):
 
 
 def draw(single_dip, glmm, weights, tau):
-    """single_dip: {model: (dip lengths, trials, memory held)}; glmm, weights: behaviour.glmm_single; tau:
+    """single_dip: {model: (dip lengths, trials, memory held)}; glmm, weights: behaviour.glmm; tau:
     behaviour.fit_tau with 'bin_ms', 'p_correct_model' and 'tau_range' (the simulated tau_N)."""
     plt.rcParams.update({'xtick.minor.size': 1.5})
     FW, FH, SIDE, BOT = 7.2, 1.95, 1.12, 0.48
@@ -41,21 +41,21 @@ def draw(single_dip, glmm, weights, tau):
         sx.text(x, y, f'{model.upper()} model', color=col, fontsize=7, ha=ha, va='center' if ha == 'left' else 'top',
                 transform=xa)
     letter(sx, 'a')
-    # b: effect of each statistic on the log-odds of an error, per within-session SD
+    # b: weight of each statistic in the joint logistic mixed model of errors
     g, sw = glmm.set_index('predictor'), weights
     jit = np.random.default_rng(0)
     for q, (stat, name, col) in enumerate(STATS):
         r, s = g.loc[stat], sw[sw.predictor == stat]
-        a.plot(np.log(s.session_or), q + jit.uniform(-0.18, 0.18, len(s)), '.', ms=2.5, color=GREY, alpha=0.5, mew=0)
-        a.plot([np.log(r.or_ci_lo), np.log(r.or_ci_hi)], [q, q], color=col, lw=1.4, solid_capstyle='butt')
-        a.plot(np.log(r.odds_ratio_per_sd), q, 'o', ms=4, color=col)
-        a.text(np.log(r.odds_ratio_per_sd), q - (0.22 if r.p_lrt < 0.05 else 0.36), stars(r.p_lrt), ha='center',
+        a.plot(s.beta, q + jit.uniform(-0.18, 0.18, len(s)), '.', ms=2.5, color=GREY, alpha=0.5, mew=0)
+        a.plot([r.ci_lo, r.ci_hi], [q, q], color=col, lw=1.4, solid_capstyle='butt')
+        a.plot(r.beta, q, 'o', ms=4, color=col)
+        a.text(r.beta, q - (0.22 if r.p_lrt < 0.05 else 0.36), stars(r.p_lrt), ha='center',
                va='center', fontsize=7.5)
     a.axvline(0, color=GREY, ls=(0, (3, 2)), lw=0.6)
-    limits(a, 'x', -0.7, 0.8, np.log(np.r_[sw.session_or, g.or_ci_lo, g.or_ci_hi]), [-0.5, 0, 0.5], ['−0.5', '0', '0.5'])
+    limits(a, 'x', -0.7, 0.8, np.r_[sw.beta, g.ci_lo, g.ci_hi], [-0.5, 0, 0.5], ['−0.5', '0', '0.5'])
     a.set_yticks(range(len(STATS)), [r[1] for r in STATS]); a.set_ylim(len(STATS) - 0.5, -0.5)
     a.tick_params(axis='y', length=0)
-    a.set_xlabel(r'$\beta$')
+    a.set_xlabel(r'$\beta$ weight')
     letter(a, 'b', x=-0.88)
     # c: fraction correct against Off time, data and the best-fitting NMDA model
     t = tau

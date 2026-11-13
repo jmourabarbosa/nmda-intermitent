@@ -3,12 +3,13 @@
 Per trial (correct and error trials, all-units decoder): fraction of the delay Off, number of Off periods, mean Off
 length and fraction On (onoff.trial_stats).
 
-glmm_single: for each statistic, a logistic mixed model of errors,
-    error ~ z(stat) + monkey + (1 + z(stat) || session),
-with the statistic z-scored within each session (so only within-session variation is used), monkey as a fixed
-effect and an uncorrelated random intercept and slope per session, fitted with the Laplace approximation (as
-lme4::glmer, nAGQ = 1); trials with at least one Off period. Tests: likelihood ratio (dropping the fixed effect,
-keeping its random slope) and Wald. Session weights: fixed effect + the session's random slope (conditional mode).
+glmm: a logistic mixed model of errors on the four statistics together,
+    error ~ z(frac_off) + z(n_off) + z(off_len_ms) + z(frac_on) + monkey + (1 + z(each statistic) || session),
+with the statistics z-scored within each session (so only within-session variation is used), monkey as a fixed
+effect and uncorrelated random intercepts and slopes per session, fitted with the Laplace approximation (as
+lme4::glmer, nAGQ = 1); trials with at least one Off period. The weight beta of a statistic is its effect on the
+log-odds of an error per within-session SD, the other three held fixed. Tests: likelihood ratio (dropping the weight,
+keeping its random slope) and Wald. Session weights: weight + the session's random slope (conditional mode).
 
 fit_tau: the NMDA time constant fitted to the pooled performance against the fraction of the delay Off. Model:
 P(memory held | Off fraction) from simulations with each tau_N (memory.tau_sweep), in 10 bins of the Off
@@ -98,30 +99,29 @@ def zscore_within(d, cols):
     return d
 
 
-def glmm_single(trials):
-    """trials: one row per trial (session, monkey, correct and STATS). Returns the fixed effect of each statistic
-    (one row per statistic) and the session weights (one row per statistic and session)."""
+def glmm(trials):
+    """trials: one row per trial (session, monkey, correct and STATS). Returns the weight of each statistic in the
+    joint model (one row per statistic) and the session weights (one row per statistic and session)."""
     d = trials[trials.n_off > 0].copy()
     d['error'] = 1 - d['correct']
     d['session'] = d['session'].astype(str)
     d = zscore_within(d, STATS)
     monkeys = np.column_stack([(d.monkey == m).values.astype(float) for m in sorted(d.monkey.unique())[1:]] or
                               [np.zeros((len(d), 0))])          # monkey as a fixed effect (none with one monkey)
+    Z = np.column_stack([np.ones(len(d))] + [d['z_' + s].values for s in STATS])   # intercept and the four statistics
+    y, groups = d.error.values, d.session.values
+    m = GLMM(np.column_stack([Z, monkeys]), Z, y, groups).fit()
+    effects, sd = m.session_effects()
     fixed, weights = [], []
-    for s in STATS:
-        Z = np.column_stack([np.ones(len(d)), d['z_' + s].values])
-        m = GLMM(np.column_stack([Z, monkeys]), Z, d.error.values, d.session.values).fit()
-        m0 = GLMM(np.column_stack([Z[:, :1], monkeys]), Z, d.error.values, d.session.values).fit()
-        b, se, lr = m.beta[1], m.se[1], 2 * (m.llf - m0.llf)
-        fixed.append(dict(predictor=s, n_trials=len(d), n_error=int(d.error.sum()), logodds_per_sd=b, se=se,
-                          odds_ratio_per_sd=np.exp(b), or_ci_lo=np.exp(b - 1.96 * se), or_ci_hi=np.exp(b + 1.96 * se),
-                          p_wald=2 * norm.sf(abs(b / se)), lr_stat=lr, p_lrt=chi2.sf(max(lr, 0), 1),
-                          re_sd_slope=m.re_sd[1], converged=m.converged and m0.converged))
-        be, sd = m.session_effects()
-        for j, ses in enumerate(np.unique(d.session.values)):
-            w = b + be[j, 1]
-            weights.append(dict(predictor=s, session=ses, session_logodds=w, session_or=np.exp(w),
-                                session_or_lo=np.exp(w - 1.96 * sd[j, 1]), session_or_hi=np.exp(w + 1.96 * sd[j, 1])))
+    for k, s in enumerate(STATS, start=1):
+        others = [i for i in range(Z.shape[1]) if i != k]
+        m0 = GLMM(np.column_stack([Z[:, others], monkeys]), Z, y, groups).fit()   # without this weight, same random slopes
+        b, se, lr = m.beta[k], m.se[k], 2 * (m.llf - m0.llf)
+        fixed.append(dict(predictor=s, n_trials=len(d), n_error=int(y.sum()), beta=b, se=se, ci_lo=b - 1.96 * se,
+                          ci_hi=b + 1.96 * se, p_wald=2 * norm.sf(abs(b / se)), lr_stat=lr, p_lrt=chi2.sf(max(lr, 0), 1),
+                          re_sd_slope=m.re_sd[k], converged=m.converged and m0.converged))
+        weights += [dict(predictor=s, session=ses, beta=b + effects[j, k], ci_lo=b + effects[j, k] - 1.96 * sd[j, k],
+                         ci_hi=b + effects[j, k] + 1.96 * sd[j, k]) for j, ses in enumerate(np.unique(groups))]
     return pd.DataFrame(fixed), pd.DataFrame(weights)
 
 
