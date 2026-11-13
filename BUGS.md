@@ -17,8 +17,6 @@ A2. **Off threshold.** The recordings use z < 0.8416 (P > 0.20 exactly); the rat
    z < 0.84 (`recordings.OFF_Z`, `onoff.OFF_Z`).
 A3. **State-length histograms.** The data's table puts states of exactly 600 ms in the 580-600 ms bin, the model in
    the >= 600 ms bin (enters the fit loss).
-A4. **Read-out noise shares** `RHO` (0.09 top, 0.11 random, 0.35 all units) are typed in, not computed; they are the
-   data's pre-cue z autocorrelation at 200 ms (the Fig. S1 notebook prints the recomputed values: 0.089, 0.107, 0.346).
 
 ## B. Statements of the paper that this repository cannot reproduce
 

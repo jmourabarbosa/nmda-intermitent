@@ -5,7 +5,7 @@ The decoder's z score is modelled as z(t) = c dr(t) + eta(t):
   c     read-out gain, not fitted: for each decoded population it is set so that the model's decoding strength
         (onoff.mu_on of the delay z) equals the data's mean over sessions;
   eta   unit-variance noise with the autocorrelation of overlapping 100 ms windows plus a constant per-trial offset
-        holding a share RHO of the variance (the data's pre-cue z autocorrelation at 200 ms; BUGS.md).
+        holding a share RHO of the variance (the data's pre-cue z autocorrelation at 200 ms, rho_from_data).
 States are labelled as in the recordings (onoff.label); the On threshold comes from pure noise eta.
 
 The seven decoded populations: the 5, 20 and 50 most cue-selective neurons, 5, 20 and 50 random neurons, and all
@@ -19,12 +19,23 @@ from . import onoff, paths, ratemodel
 STEP, WIN = 10, 100
 SETS = {'top 5': ('top', 5), 'top 20': ('top', 20), 'top 50': ('top', 50), 'rand 5': ('random', 5),
         'rand 20': ('random', 20), 'rand 50': ('random', 50), 'all': ('all', None)}
-RHO = {'top': 0.09, 'random': 0.11, 'all': 0.35}
 GAIN_GRID = 10 ** np.linspace(-2.6, -0.3, 10)
 # fit loss: (data column, model key, scale) of six statistics, and the weight of the length-distribution term
 LOSS_STATS = (('off_per_trial', 'n_off', 0.3), ('off_mean_ms', 'off_mean', 20.0), ('frac_off', 'frac_off', 0.05),
               ('on_per_trial', 'n_on', 0.3), ('on_mean_ms', 'on_mean', 20.0), ('frac_on', 'frac_on', 0.05))
 W_HIST = 50
+
+
+def rho_from_data():
+    """Share of the read-out noise that is constant within a trial, per kind of decoded population: the recordings'
+    pre-cue z autocorrelation at 200 ms (beyond the 100 ms windows), mean over sessions, to two decimals as in the
+    paper (top: the 20 most selective units, random: 20 random units)."""
+    a = pd.read_csv(paths.results('recordings', 'precue_acf.csv'))
+    m = a[a.lag_ms == 200].groupby('set').acf.mean()
+    return {'top': float(round(m['top20'], 2)), 'random': float(round(m['random20'], 2)), 'all': float(round(m['all'], 2))}
+
+
+RHO = rho_from_data()
 
 
 def load_data():
