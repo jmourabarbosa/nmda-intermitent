@@ -8,8 +8,8 @@ from nmdaint.behaviour import wilson
 from .style import C_FIT, C_OFF, C_ON, C_STP, GREY, INK, limits
 
 DPI = 300
-STATS = (('frac_off', 'Total Off time', C_OFF), ('off_len_ms', 'Off length', C_OFF), ('n_off', 'Off states', C_OFF),
-         ('frac_on', 'Total On time', C_ON))
+STATS = {'frac_off': ('Total Off time', C_OFF), 'off_len_ms': ('Off length', C_OFF), 'n_off': ('Off states', C_OFF),
+         'frac_on': ('Total On time', C_ON), 'on_len_ms': ('On length', C_ON), 'n_on': ('On states', C_ON)}
 
 
 def letter(ax, txt, x=-0.3, y=1.04):
@@ -43,17 +43,18 @@ def draw(single_dip, glmm, weights, tau):
     letter(sx, 'a')
     # b: weight of each statistic in the joint logistic mixed model of errors
     g, sw = glmm.set_index('predictor'), weights
+    order = g.beta.abs().sort_values(ascending=False).index                    # strongest weight on top
     jit = np.random.default_rng(0)
-    for q, (stat, name, col) in enumerate(STATS):
+    for q, stat in enumerate(order):
+        name, col = STATS[stat]
         r, s = g.loc[stat], sw[sw.predictor == stat]
         a.plot(s.beta, q + jit.uniform(-0.18, 0.18, len(s)), '.', ms=2.5, color=GREY, alpha=0.5, mew=0)
         a.plot([r.ci_lo, r.ci_hi], [q, q], color=col, lw=1.4, solid_capstyle='butt')
         a.plot(r.beta, q, 'o', ms=4, color=col)
-        a.text(r.beta, q - (0.22 if r.p_lrt < 0.05 else 0.36), stars(r.p_lrt), ha='center',
-               va='center', fontsize=7.5)
+        a.text(max(r.ci_hi, s.beta.max()) + 0.04, q, stars(r.p_lrt), ha='left', va='center_baseline', fontsize=7)
     a.axvline(0, color=GREY, ls=(0, (3, 2)), lw=0.6)
     limits(a, 'x', -0.7, 0.8, np.r_[sw.beta, g.ci_lo, g.ci_hi], [-0.5, 0, 0.5], ['−0.5', '0', '0.5'])
-    a.set_yticks(range(len(STATS)), [r[1] for r in STATS]); a.set_ylim(len(STATS) - 0.5, -0.5)
+    a.set_yticks(range(len(order)), [STATS[s][0] for s in order]); a.set_ylim(len(order) - 0.5, -0.5)
     a.tick_params(axis='y', length=0)
     a.set_xlabel(r'$\beta$ weight')
     letter(a, 'b', x=-0.88)

@@ -58,11 +58,14 @@ def stats(state, delay):
 
 
 def trial_stats(state):
-    """Per trial, on states restricted to the delay: fraction Off, number of Off periods, mean Off length (ms, NaN
-    without Off periods) and fraction On."""
-    offs = [[(b - a) * STEP for a, b in runs(s == -1)] for s in state]
-    return dict(frac_off=(state == -1).mean(1), n_off=np.array([len(o) for o in offs], float),
-                off_len_ms=np.array([np.mean(o) if o else np.nan for o in offs]), frac_on=(state == 1).mean(1))
+    """Per trial, on states restricted to the delay: for Off and for On, the fraction of the delay, the number of
+    periods and their mean length (ms, NaN without periods)."""
+    out = {}
+    for name, lab in (('off', -1), ('on', 1)):
+        L = [[(b - a) * STEP for a, b in runs(s == lab)] for s in state]
+        out.update({f'frac_{name}': (state == lab).mean(1), f'n_{name}': np.array([len(x) for x in L], float),
+                    f'{name}_len_ms': np.array([np.mean(x) if x else np.nan for x in L])})
+    return out
 
 
 def mu_on(z, rng, n_max=40000):
