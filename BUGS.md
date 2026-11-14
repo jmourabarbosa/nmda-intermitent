@@ -55,5 +55,4 @@ C3. **tau_N is fixed at 150 ms** (`ratemodel.FIXED`; the fit has six free parame
 | synthetic validation, 24 sessions | `readout_suppl_handoff/data/synthetic_sessions.csv` | identical |
 
 
-Figures: the Google Doc's Figs. 1, 3 and 4 were replaced by the code's. Its Figs. 2, S1, S2 and S3 predate the
-per-population rho (the 5- and 50-unit model points and the random-20 autocorrelation moved slightly).
+Figures: all the Google Doc's figures were replaced by the code's.
