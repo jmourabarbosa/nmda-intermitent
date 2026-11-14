@@ -8,8 +8,8 @@ from nmdaint.behaviour import wilson
 from .style import C_FIT, C_OFF, C_ON, C_STP, GREY, INK, limits
 
 DPI = 300
-STATS = {'frac_off': ('Total Off time', C_OFF), 'off_len_ms': ('Off length', C_OFF), 'n_off': ('Off states', C_OFF),
-         'frac_on': ('Total On time', C_ON), 'on_len_ms': ('On length', C_ON), 'n_on': ('On states', C_ON)}
+STATS = {'frac_off': ('Total Off time', C_OFF), 'n_off': ('# Off states', C_OFF), 'frac_on': ('Total On time', C_ON),
+         'n_on': ('# On states', C_ON)}                     # panel b, top to bottom
 
 
 def letter(ax, txt, x=-0.3, y=1.04):
@@ -43,7 +43,7 @@ def draw(single_dip, glmm, weights, tau):
     letter(sx, 'a')
     # b: weight of each statistic in the joint logistic mixed model of errors
     g, sw = glmm.set_index('predictor'), weights
-    order = g.beta.abs().sort_values(ascending=False).index                    # strongest weight on top
+    order = list(STATS)
     jit = np.random.default_rng(0)
     for q, stat in enumerate(order):
         name, col = STATS[stat]

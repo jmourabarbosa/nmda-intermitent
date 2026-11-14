@@ -58,13 +58,12 @@ def stats(state, delay):
 
 
 def trial_stats(state):
-    """Per trial, on states restricted to the delay: for Off and for On, the fraction of the delay, the number of
-    periods and their mean length (ms, NaN without periods)."""
+    """Per trial, on states restricted to the delay: for Off and for On, the fraction of the delay and the number of
+    periods."""
     out = {}
     for name, lab in (('off', -1), ('on', 1)):
-        L = [[(b - a) * STEP for a, b in runs(s == lab)] for s in state]
-        out.update({f'frac_{name}': (state == lab).mean(1), f'n_{name}': np.array([len(x) for x in L], float),
-                    f'{name}_len_ms': np.array([np.mean(x) if x else np.nan for x in L])})
+        out.update({f'frac_{name}': (state == lab).mean(1),
+                    f'n_{name}': np.array([len(runs(s == lab)) for s in state], float)})
     return out
 
 
