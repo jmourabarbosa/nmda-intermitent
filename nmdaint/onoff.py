@@ -58,14 +58,11 @@ def stats(state, delay):
 
 
 def trial_stats(state, delay):
-    """Per trial (rows of state, the labelled time points): in the delay (boolean mask over them), the fraction of time
-    Off and the number of Off periods; whether the delay ends Off; and the time from the end of the last On period to
-    the end of the labelled window (ms; the whole window without On periods)."""
+    """Per trial (rows of state, the labelled time points), in the delay (boolean mask over them): the fraction of time
+    Off, the number of Off periods and whether the delay ends Off."""
     sd = state[:, delay]
-    n = state.shape[1]
-    last_on = np.array([np.flatnonzero(s == 1)[-1] if (s == 1).any() else -1 for s in state])
     return dict(frac_off=(sd == -1).mean(1), n_off=np.array([len(runs(s == -1)) for s in sd], float),
-                end_off=(sd[:, -1] == -1).astype(float), t_since_on_ms=(n - 1 - last_on) * float(STEP))
+                end_off=(sd[:, -1] == -1).astype(float))
 
 
 def mu_on(z, rng, n_max=40000):

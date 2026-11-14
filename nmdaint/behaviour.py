@@ -1,11 +1,10 @@
 """Off states and errors in the recordings.
 
 Per trial (correct and error trials, all-units decoder; onoff.trial_stats): fraction of the delay Off, number of Off
-periods, whether the delay ends Off, time since the last On period; and whether the previous trial was an error.
+periods and whether the delay ends Off; and whether the previous trial was an error.
 
-glmm: a logistic mixed model of errors on these five statistics together, all trials,
-    error ~ z(frac_off) + z(n_off) + z(end_off) + z(t_since_on_ms) + z(prev_error) + cue + monkey
-            + (1 + z(each statistic) || session),
+glmm: a logistic mixed model of errors on these four statistics together, all trials,
+    error ~ z(frac_off) + z(n_off) + z(end_off) + z(prev_error) + cue + monkey + (1 + z(each statistic) || session),
 with the statistics z-scored within each session (so only within-session variation is used), cue location and
 monkey as fixed effects and uncorrelated random intercepts and slopes per session, fitted with the Laplace
 approximation (as lme4::glmer, nAGQ = 1). The weight beta of a statistic is its effect on the log-odds of an error
@@ -22,7 +21,7 @@ from scipy.optimize import minimize
 from scipy.special import expit
 from scipy.stats import chi2, norm
 
-STATS = ('frac_off', 'n_off', 'end_off', 't_since_on_ms', 'prev_error')
+STATS = ('frac_off', 'n_off', 'end_off', 'prev_error')
 
 
 # ------------------------------------------------------------------------------------------------ mixed model
@@ -112,7 +111,7 @@ def glmm(trials):
     d = zscore_within(d, STATS)
     covariates = np.column_stack([(d[col] == v).values.astype(float) for col in ('monkey', 'cue')
                                   for v in sorted(d[col].unique())[1:]])    # monkey (none with one) and cue location
-    Z = np.column_stack([np.ones(len(d))] + [d['z_' + s].values for s in STATS])   # intercept and the five statistics
+    Z = np.column_stack([np.ones(len(d))] + [d['z_' + s].values for s in STATS])   # intercept and the four statistics
     y, groups = d.error.values, d.session.values
     m = GLMM(np.column_stack([Z, covariates]), Z, y, groups).fit()
     effects, sd = m.session_effects()

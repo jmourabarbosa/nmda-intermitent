@@ -9,7 +9,7 @@ from .style import C_FIT, C_OFF, C_STP, GREY, INK, limits
 
 DPI = 300
 STATS = {'frac_off': ('Total Off time', C_OFF), 'n_off': ('# Off states', C_OFF), 'end_off': ('Ends Off', C_OFF),
-         't_since_on_ms': ('Time since last On', C_OFF), 'prev_error': ('Previous error', GREY)}   # panel b, top to bottom
+         'prev_error': ('Previous error', INK)}             # panel b: colour when significant, grey otherwise
 
 
 def letter(ax, txt, x=-0.3, y=1.04):
@@ -43,10 +43,10 @@ def draw(single_dip, glmm, weights, tau):
     letter(sx, 'a')
     # b: weight of each statistic in the joint logistic mixed model of errors
     g, sw = glmm.set_index('predictor'), weights
-    order = list(STATS)
+    order = g.beta.sort_values(ascending=False).index                         # largest weight on top
     jit = np.random.default_rng(0)
     for q, stat in enumerate(order):
-        name, col = STATS[stat]
+        name, col = STATS[stat][0], STATS[stat][1] if g.loc[stat, 'p_lrt'] < 0.05 else GREY
         r, s = g.loc[stat], sw[sw.predictor == stat]
         a.plot(s.beta, q + jit.uniform(-0.18, 0.18, len(s)), '.', ms=2.5, color=GREY, alpha=0.5, mew=0)
         a.plot([r.ci_lo, r.ci_hi], [q, q], color=col, lw=1.4, solid_capstyle='butt')
