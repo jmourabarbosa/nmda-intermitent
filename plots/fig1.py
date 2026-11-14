@@ -4,7 +4,7 @@ import numpy as np
 from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 
 from nmdaint import onoff
-from .style import C_OFF, C_ON, C_UN, GREY, INK, LIGHT, letter, limits, runs, shade
+from .style import C_OFF, C_ON, C_UN, GREY, INK, LIGHT, letter, runs, shade
 
 SHADES = {'off': ('#16606d', C_OFF, '#86d3e0'), 'on': ('#9c1215', C_ON, '#f39a9c')}
 Z_INK = ('#7f7f7f', INK, '#bdbdbd')

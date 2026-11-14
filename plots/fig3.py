@@ -5,11 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nmdaint.behaviour import wilson
-from .style import C_FIT, C_OFF, C_STP, GREY, INK, limits
+from .style import C_FIT, C_STP, GREY, INK, limits
 
 DPI = 300
-STATS = {'frac_off': ('Total Off time', C_OFF), 'n_off': ('# Off states', C_OFF), 'end_off': ('Ends Off', C_OFF),
-         'prev_error': ('Previous error', INK)}             # panel b: colour when significant, grey otherwise
+STATS = {'frac_off': 'Total Off time', 'n_off': '# Off states', 'end_off': 'Ends Off', 'prev_error': 'Previous error'}
 
 
 def letter(ax, txt, x=-0.3, y=1.04):
@@ -46,7 +45,7 @@ def draw(single_dip, glmm, weights, tau):
     order = g.beta.sort_values(ascending=False).index                         # largest weight on top
     jit = np.random.default_rng(0)
     for q, stat in enumerate(order):
-        name, col = STATS[stat][0], STATS[stat][1] if g.loc[stat, 'p_lrt'] < 0.05 else GREY
+        col = INK if g.loc[stat, 'p_lrt'] < 0.05 else GREY                       # black when significant
         r, s = g.loc[stat], sw[sw.predictor == stat]
         a.plot(s.beta, q + jit.uniform(-0.18, 0.18, len(s)), '.', ms=2.5, color=GREY, alpha=0.5, mew=0)
         a.plot([r.ci_lo, r.ci_hi], [q, q], color=col, lw=1.4, solid_capstyle='butt')
@@ -54,7 +53,7 @@ def draw(single_dip, glmm, weights, tau):
         a.text(max(r.ci_hi, s.beta.max()) + 0.04, q, stars(r.p_lrt), ha='left', va='center_baseline', fontsize=7)
     a.axvline(0, color=GREY, ls=(0, (3, 2)), lw=0.6)
     limits(a, 'x', -0.7, 0.8, np.r_[sw.beta, g.ci_lo, g.ci_hi], [-0.5, 0, 0.5], ['−0.5', '0', '0.5'])
-    a.set_yticks(range(len(order)), [STATS[s][0] for s in order]); a.set_ylim(len(order) - 0.5, -0.5)
+    a.set_yticks(range(len(order)), [STATS[s] for s in order]); a.set_ylim(len(order) - 0.5, -0.5)
     a.tick_params(axis='y', length=0)
     a.set_xlabel(r'$\beta$ weight')
     letter(a, 'b', x=-0.88)
