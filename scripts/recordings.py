@@ -3,7 +3,7 @@
 results/recordings/
   readout_per_session.csv   On/Off statistics per session, decoded population and random draw (Figs. 2, S2, S3)
   readout_histograms.csv    state-length counts pooled over sessions, per decoded population (model fit)
-  per_trial.csv             per-trial Off/On statistics of correct and error trials, all units (Fig. 3b-d)
+  per_trial.csv             per-trial Off statistics and cue of correct and error trials, all units (Fig. 3b-d)
   precue_acf.csv            autocorrelation of the pre-cue z of three decoded populations (Fig. S1b)
   example_delay_z.npz       delay z of the session closest to the mean decoding strength, with its mixture fit (Fig. S1c)
   procrustes.csv, pca_plane.csv  Procrustes similarity and the PCA plane of an example session (Fig. 4d, e)
@@ -48,13 +48,13 @@ def run_session(path):
             res['acf'][lab] = acf(z[:, pre])
         if key[0] == 'all':
             res['z_delay'] = z[:, S.delay].astype(np.float32)
-            dstate = st[:, S.delay[S.sw]]
+            st_all = st
     # per trial: correct trials (leave-one-out decoders) and error trials (decoders of all correct trials)
     _, st_err = S.states(S.error_confidence())
     trials = []
-    for idx, dst, correct in ((S.trial_index, dstate, 1), (S.error_index, st_err[:, S.delay[S.sw]], 0)):
-        trials.append(pd.DataFrame(dict(session=S.name, trial_index=idx,
-                                        correct=correct, **onoff.trial_stats(dst))))
+    for idx, s, cue, correct in ((S.trial_index, st_all, S.cue, 1), (S.error_index, st_err, S.cue_err, 0)):
+        trials.append(pd.DataFrame(dict(session=S.name, trial_index=idx, cue=cue, correct=correct,
+                                        **onoff.trial_stats(s, S.delay[S.sw]))))
     res['trials'] = pd.concat(trials).sort_values('trial_index')
     # population geometry: states from all units of one half of the units, activity of the other half
     H1, H2 = population.unit_halves(S.n_units)

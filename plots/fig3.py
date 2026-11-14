@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nmdaint.behaviour import wilson
-from .style import C_FIT, C_OFF, C_ON, C_STP, GREY, INK, limits
+from .style import C_FIT, C_OFF, C_STP, GREY, INK, limits
 
 DPI = 300
-STATS = {'frac_off': ('Total Off time', C_OFF), 'n_off': ('# Off states', C_OFF), 'frac_on': ('Total On time', C_ON),
-         'n_on': ('# On states', C_ON)}                     # panel b, top to bottom
+STATS = {'frac_off': ('Total Off time', C_OFF), 'n_off': ('# Off states', C_OFF), 'end_off': ('Ends Off', C_OFF),
+         't_since_on_ms': ('Time since last On', C_OFF), 'prev_error': ('Previous error', GREY)}   # panel b, top to bottom
 
 
 def letter(ax, txt, x=-0.3, y=1.04):
