@@ -95,13 +95,16 @@ def evaluate(p, ses, n_trials=1056, seed=0, sets=tuple(SETS), sim=None, gains=No
     delay, valid = (tz >= 500) & (tz <= 1400), (tz >= 0) & (tz <= 1400)
     out = dict(mem=float(ratemodel.memory_correct(sim).mean()), sim=sim, tz=tz, sets={})
     cache = {}
-    for lab in sets:
+    # the 20-unit and all-units populations draw first: their noise stays the one drawn when every top and every
+    # random population used the 20-unit rho
+    for lab in sorted(sets, key=lambda l: l not in ('top 20', 'rand 20', 'all')):
         rho = RHO[lab]
         if rho not in cache:                  # populations with the same rho share the noise draw
             eta = noise(dw.shape, rho, rng)
             mus = gain_curve(dw, eta, delay, rng) if gains is None else None
             cache[rho] = eta, mus, null_threshold(dw.shape, rho, rng)
-        eta, mus, thr = cache[rho]
+    for lab in sets:
+        eta, mus, thr = cache[RHO[lab]]
         c = gain_for(ses[lab]['mu_on'].mean(), mus) if gains is None else gains[lab]
         state = onoff.label(c * dw + eta, thr, valid)
         out['sets'][lab] = dict(gain=c, z=c * dw + eta, state=state, **onoff.stats(state, delay))
