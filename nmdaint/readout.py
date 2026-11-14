@@ -5,7 +5,7 @@ The decoder's z score is modelled as z(t) = c dr(t) + eta(t):
   c     read-out gain, not fitted: for each decoded population it is set so that the model's decoding strength
         (onoff.mu_on of the delay z) equals the data's mean over sessions;
   eta   unit-variance noise with the autocorrelation of overlapping 100 ms windows plus a constant per-trial offset
-        holding a share RHO of the variance (the data's pre-cue z autocorrelation at 200 ms, rho_from_data).
+        holding a share RHO of the variance, per decoded population (its pre-cue z autocorrelation at 200 ms).
 States are labelled as in the recordings (onoff.label); the On threshold comes from pure noise eta.
 
 The seven decoded populations: the 5, 20 and 50 most cue-selective neurons, 5, 20 and 50 random neurons, and all
@@ -27,12 +27,12 @@ W_HIST = 50
 
 
 def rho_from_data():
-    """Share of the read-out noise that is constant within a trial, per kind of decoded population: the recordings'
-    pre-cue z autocorrelation at 200 ms (beyond the 100 ms windows), mean over sessions, to two decimals as in the
-    paper (top: the 20 most selective units, random: 20 random units)."""
+    """Share of the read-out noise that is constant within a trial, per decoded population: the recordings' pre-cue z
+    autocorrelation at 200 ms (beyond the 100 ms windows; random draws averaged within each session), mean over
+    sessions, to two decimals."""
     a = pd.read_csv(paths.results('recordings', 'precue_acf.csv'))
     m = a[a.lag_ms == 200].groupby('set').acf.mean()
-    return {'top': float(round(m['top20'], 2)), 'random': float(round(m['random20'], 2)), 'all': float(round(m['all'], 2))}
+    return {lab: float(round(m[lab], 2)) for lab in SETS}
 
 
 RHO = rho_from_data()
@@ -96,8 +96,8 @@ def evaluate(p, ses, n_trials=1056, seed=0, sets=tuple(SETS), sim=None, gains=No
     out = dict(mem=float(ratemodel.memory_correct(sim).mean()), sim=sim, tz=tz, sets={})
     cache = {}
     for lab in sets:
-        rho = RHO[SETS[lab][0]]
-        if rho not in cache:                  # populations of the same kind share the noise draw
+        rho = RHO[lab]
+        if rho not in cache:                  # populations with the same rho share the noise draw
             eta = noise(dw.shape, rho, rng)
             mus = gain_curve(dw, eta, delay, rng) if gains is None else None
             cache[rho] = eta, mus, null_threshold(dw.shape, rho, rng)

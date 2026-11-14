@@ -4,7 +4,7 @@ results/recordings/
   readout_per_session.csv   On/Off statistics per session, decoded population and random draw (Figs. 2, S2, S3)
   readout_histograms.csv    state-length counts pooled over sessions, per decoded population (model fit)
   per_trial.csv             per-trial Off statistics and cue of correct and error trials, all units (Fig. 3b-d)
-  precue_acf.csv            autocorrelation of the pre-cue z of three decoded populations (Fig. S1b)
+  precue_acf.csv            autocorrelation of the pre-cue z of each decoded population, random draws averaged (Fig. S1b)
   example_delay_z.npz       delay z of the session closest to the mean decoding strength, with its mixture fit (Fig. S1c)
   procrustes.csv, pca_plane.csv  Procrustes similarity and the PCA plane of an example session (Fig. 4d, e)
 
@@ -21,13 +21,20 @@ from sklearn.mixture import GaussianMixture
 
 from nmdaint import onoff, paths, population, recordings as REC
 
-ACF_SETS = {('top', 20, 0): 'top20', ('random', 20, 0): 'random20'}     # and 'all'
 EXAMPLE_PCA = '221024'
 
 
 def acf(z, max_lag=30):
     x = z - z.mean()
     return np.array([(x[:, :x.shape[1] - k] * x[:, k:]).mean() / (x * x).mean() for k in range(max_lag + 1)])
+
+
+def set_label(key):
+    """The read-out's name of a decoded population (readout.SETS); None for the sizes the paper does not use."""
+    kind, k, _ = key
+    if kind == 'all':
+        return 'all'
+    return f"{'top' if kind == 'top' else 'rand'} {k}" if k in (5, 20, 50) else None
 
 
 def run_session(path):
@@ -43,12 +50,13 @@ def run_session(path):
         row, h = S.readout_row(key, conf, z, st)
         res['rows'].append(row)
         res['hists'][key] = h
-        lab = 'all' if key[0] == 'all' else ACF_SETS.get(key)
+        lab = set_label(key)
         if lab:
-            res['acf'][lab] = acf(z[:, pre])
+            res['acf'].setdefault(lab, []).append(acf(z[:, pre]))
         if key[0] == 'all':
             res['z_delay'] = z[:, S.delay].astype(np.float32)
             st_all = st
+    res['acf'] = {lab: np.mean(v, 0) for lab, v in res['acf'].items()}      # random draws averaged
     # per trial: correct trials (leave-one-out decoders) and error trials (decoders of all correct trials)
     _, st_err = S.states(S.error_confidence())
     trials = []

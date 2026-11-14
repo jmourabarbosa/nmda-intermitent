@@ -9,7 +9,7 @@ from nmdaint import onoff, readout
 from .style import C_OFF, C_ON, GREY, INK, LIGHT, letter, limits, runs, shade
 
 C_RO, C_REP = '#2b83ba', GREY
-POPC = {'all': INK, 'top20': '#636363', 'random20': '#bdbdbd'}
+POPC = {'all': INK, 'top 20': '#636363', 'rand 20': '#bdbdbd'}
 FS = 6.5
 NAMES = {'rand 20': 'Random 20', 'all': 'All units', 'top 20': 'Top 20'}
 
@@ -78,15 +78,15 @@ def draw(m, acf, data_z, syn, E, ses, rho, targets):
     cx = fig.add_subplot(gs[1, 0:2])
     za = acf
     lag = np.arange(0, acf.lag_ms.max() + 1, 10)
-    for pop, kind in (('all', 'all'), ('top20', 'top'), ('random20', 'random')):
+    for pop in POPC:
         mean = za[za.set == pop].groupby('lag_ms').acf.mean()
         cx.plot(mean.index, mean.values, color=POPC[pop], lw=1.1)
-        rho_k = rho[kind]
+        rho_k = rho[pop]
         cx.plot(lag, (1 - rho_k) * np.clip(1 - lag / readout.WIN, 0, None) + rho_k, color=POPC[pop], lw=0.9, ls=(0, (3, 2)))
     cx.axvline(readout.WIN, color=LIGHT, lw=0.6)
     cx.set_xlim(0, lag[-1]); cx.set_ylim(0, 1.02)
     cx.set_xlabel('Lag (ms)'); cx.set_ylabel('Pre-cue z autocorrelation')
-    labels(cx, [('Solid: data, dashed: model noise', INK), ('All units', POPC['all']), ('Top 20', POPC['top20']),
+    labels(cx, [('Solid: data, dashed: model noise', INK), ('All units', POPC['all']), ('Top 20', POPC['top 20']),
                 ('Random 20', '#9e9e9e')], 0.98, 0.98, 0.11, 'right')
     letter(cx, 'b', x=-0.4, y=1.02)
 

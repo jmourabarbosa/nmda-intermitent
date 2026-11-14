@@ -42,7 +42,7 @@ C3. **tau_N is fixed at 150 ms** (`ratemodel.FIXED`; the fit has six free parame
 | read-out table, 25 sessions x 61 decoded populations | `paper_model/data/readout_per_session_data_lam10000.csv` | identical (mu_on to 4e-15) |
 | state-length histograms | `readout_histograms_data_lam10000.csv` | identical |
 | per-trial statistics, 15,468 correct and error trials | `behaviour_handoff/data/per_trial_correct_and_error.csv` | identical |
-| pre-cue z autocorrelation at 200 ms | `RHO` of the read-out | 0.346, 0.089, 0.107 (all, top 20, random 20) |
+| pre-cue z autocorrelation at 200 ms | `RHO` of the read-out | all, top 20: 0.346, 0.089, identical; random 20: 0.111 instead of 0.107 (all random draws averaged instead of the first); now also computed for top/random 5 and 50, which used the 20-unit values |
 | GLMM fixed effects and session weights | `joint_glmm.csv`, `joint_glmm_session_weights.csv` | equal to 1e-6 (optimiser) |
 | tau sweep, 17 tau_N x 30,000 trials | `figures/off_vs_memory/nmda/tau_sweep/*.npz` | identical |
 | tau_N fit and bootstrap | `fig3_behaviour_tau.py` | 123 ms, 95% interval 101-190 ms, identical |
