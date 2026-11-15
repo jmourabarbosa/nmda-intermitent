@@ -40,8 +40,8 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 | 3 | `fig3.ipynb` | single-dip test, mixed model, tau fit (2 min) | per-trial statistics; tau sweep (optional rerun) |
 | 4 | `fig4.ipynb` | network read-out, tuning, PCA, Procrustes (4 min) | network spike counts; the data's Procrustes and PCA plane |
 | S1 | `figS1.ipynb` | read-out, calibration, synthetic validation (3 min) | the data's pre-cue z autocorrelation and one session's delay z |
-| S2, S3 | `figS2.ipynb`, `figS3.ipynb` | control without dips, STP model (1-3 min) | the data's On/Off statistics |
-| S4 | `figS4.ipynb` | rate model, read-out of 7 populations (30 s); optional: data decoder on one session | the data's On/Off statistics |
+| S2 | `figS2.ipynb` | rate model, read-out of 7 populations (30 s); optional: data decoder on one session | the data's On/Off statistics |
+| S3, S4 | `figS3.ipynb`, `figS4.ipynb` | control without dips, STP model (1-3 min) | the data's On/Off statistics |
 
 ## Running
 

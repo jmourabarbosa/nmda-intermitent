@@ -68,12 +68,12 @@ def draw(e, lengths, gains, quiet, cue_dur, r_max):
     for ax in (a, b):
         ax.tick_params(labelbottom=False)
     # b: length distribution at the calibrated gain (fraction of states in 40 ms bins); triangles: mean length at each gain
+    mid = lengths[next(k for k, f in gains.items() if f == 1)]
+    hist = {name: (mid[f'h_{name}'][:30][0::2] + mid[f'h_{name}'][:30][1::2]) / max(mid[f'h_{name}'].sum(), 1) for name in ('off', 'on')}
+    top = np.ceil(max(h.max() for h in hist.values()) * 10) / 10          # same axis for both states
     for j, (name, c) in enumerate((('off', C_OFF), ('on', C_ON))):
         h = fig.add_subplot(gh[j], sharex=fig.axes[-1] if j else None)
-        cnt = lengths[next(k for k, f in gains.items() if f == 1)][f'h_{name}']
-        hm = (cnt[:30][0::2] + cnt[:30][1::2]) / max(cnt.sum(), 1)
-        h.bar(np.arange(0, 600, 40), hm, width=40, align='edge', color=c, lw=0)
-        top = np.ceil(hm.max() * 10) / 10
+        h.bar(np.arange(0, 600, 40), hist[name], width=40, align='edge', color=c, lw=0)
         for i, (key, _, lab) in enumerate(GAINS):
             h.plot(lengths[key][f'{name}_mean'], 0.96 * top, 'v', ms=4.5, color=SHADES[name][i], mec=INK, mew=0.4, clip_on=False,
                    zorder=5)
