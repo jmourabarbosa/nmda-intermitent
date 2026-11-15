@@ -51,10 +51,15 @@ PREAMBLE = r"""%% Generated from the Google Doc by doc_to_latex.py -- do not edi
 \usepackage[a4paper,margin=2.5cm]{geometry}
 \usepackage{amsmath,amssymb,bm}
 \usepackage{graphicx}
-\usepackage[labelfont=bf,labelsep=period,font=small]{caption}
-\usepackage[round]{natbib}
+\usepackage{xcolor}
+\definecolor{natblue}{RGB}{0,107,182}
+\usepackage{caption}
+\DeclareCaptionLabelSeparator{pipe}{ $|$ }
+\captionsetup{labelfont=bf,labelsep=pipe,font=small}
+\usepackage[super,sort&compress,comma]{natbib}
 \usepackage{microtype}
-\usepackage[hidelinks]{hyperref}
+\usepackage[colorlinks,linkcolor=natblue,citecolor=natblue,urlcolor=natblue]{hyperref}
+\renewcommand{\figurename}{Fig.}
 \setcounter{secnumdepth}{0}
 \renewcommand{\refname}{References}
 """
@@ -169,10 +174,32 @@ def cite(text, idx, used):
 
     def narr(m):
         ks = keys_for(m.group(1), m.group(2), m.group(3), m.group(4), idx); used.update(ks)
-        return r'\citet{' + ','.join(ks) + '}'
+        return m.group(0)[:m.group(0).rindex('(')].rstrip() + r'\citep{' + ','.join(ks) + '}'   # 'Author et al.' + superscript
     text = re.sub(r'\(([^()]*\d{4}[^()]*)\)', paren, text)
     text = re.sub(rf"{ONE}\s+\((\d{{4}}(?:,\s*\d{{4}})*)\)", narr, text)
     return text
+
+
+# ---------------------------------------------------------------- figure references (Nature style)
+PANELS = r"(?:[a-z](?![a-z])(?:[,–-][a-z](?![a-z]))*)?"
+
+
+def figrefs(text):
+    r"""'Fig. 1c,d' -> Fig.~\hyperref[fig:1]{1c,d}; 'Supplementary Figs. 2 and 3' likewise (labels fig:S2, ...)."""
+    def one(sup, num, pan):
+        return r'\hyperref[fig:%s%s]{%s%s}' % ('S' if sup else '', num, num, pan)
+
+    def rep(m):
+        sup, figs, num, pan, rest = m.group(1), m.group(2), m.group(3), m.group(4), m.group(5) or ''
+        rest = re.sub(r'(\s(?:and|to)\s|,\s)(\d+)(' + PANELS + ')', lambda r: r.group(1) + one(sup, r.group(2), r.group(3)), rest)
+        return '%s%s.~%s%s' % (sup or '', figs, one(sup, num, pan), rest)
+    return re.sub(r'(Supplementary )?(Figs?)\.\s(\d+)(' + PANELS + r')((?:(?:\s(?:and|to)\s|,\s)\d+' + PANELS + r'(?![\d.]))*)', rep, text)
+
+
+def bold_panels(cap):
+    """Caption panel labels in bold: 'a, ...' at the start of a sentence, and '(b)' references."""
+    cap = re.sub(r'(^|(?<=\.\s)|(?<=\.\}\s)|(?<=\.\s\}))([a-l](?:(?:,\s?|[–-])[a-l])*),(?=\s)', lambda m: m.group(1) + r'\textbf{' + m.group(2) + '},', cap)
+    return re.sub(r'\(([a-l](?:[,–-][a-l])*)\)', r'(\\textbf{\1})', cap)
 
 
 # ---------------------------------------------------------------- paragraphs
@@ -228,7 +255,7 @@ def convert(doc, out_dir, bib):
                 continue
             if section == 'Supplementary Figures':
                 out.append('\\clearpage\n\\section{Supplementary Figures}\n\\setcounter{figure}{0}\n'
-                           '\\renewcommand{\\figurename}{Supplementary Figure}\n'); continue
+                           '\\renewcommand{\\figurename}{Supplementary Fig.}\n'); continue
             out.append('\\%s{%s}\n' % ('section' if p['style'] == 'HEADING_1' else 'subsection', p['tex']))
             continue
         if p['imgs']:
@@ -246,9 +273,9 @@ def convert(doc, out_dir, bib):
         if m and pending_img:
             cap = re.sub(r'^\\textbf\{(Supplementary )?Figure \d+\.\s*', r'\\textbf{', p['tex'])
             cap = re.sub(r'^(Supplementary )?Figure \d+\.\s*', '', cap)
-            cap = cite(cap, idx, used)
-            out.append('\\begin{figure}[%s]\n\\centering\n\\includegraphics[width=\\textwidth]{%s}\n\\caption{%s}\n\\end{figure}\n'
-                       % ('p' if m.group(1) else 'tbp', pending_img, cap))
+            cap = figrefs(bold_panels(cite(cap, idx, used)))
+            out.append('\\begin{figure}[%s]\n\\centering\n\\includegraphics[width=\\textwidth]{%s}\n\\caption{%s}\\label{fig:%s%s}\n\\end{figure}\n'
+                       % ('p' if m.group(1) else 'tbp', pending_img, cap, 'S' if m.group(1) else '', m.group(2)))
             pending_img = None
             continue
         if p['align'] == 'CENTER' and section != '':
@@ -258,7 +285,7 @@ def convert(doc, out_dir, bib):
                 warnings.append('equation not in EQUATIONS (kept as text): ' + p['plain'])
                 out.append('\\begin{center}%s\\end{center}\n' % p['tex'])
             continue
-        out.append(cite(p['tex'], idx, used) + '\n')
+        out.append(figrefs(cite(p['tex'], idx, used)) + '\n')
     if pending_img:
         warnings.append('image without a caption: ' + pending_img)
     # the doc's reference list must match the cited bib entries
@@ -277,7 +304,7 @@ def convert(doc, out_dir, bib):
         warnings.append('cited but missing from the doc reference list: ' + ', '.join(sorted(used - ref_keys)))
     if ref_keys - used:
         warnings.append('in the doc reference list but never cited: ' + ', '.join(sorted(ref_keys - used)))
-    out.append('\\bibliographystyle{apalike}\n\\bibliography{refs}\n\\end{document}\n')
+    out.append('\\bibliographystyle{unsrtnat}\n\\bibliography{refs}\n\\end{document}\n')
     tex = '\n'.join(out)
     tex = tex.replace('\\section{Supplementary Figures}', '\\section{Supplementary Figures}')
     k = tex.index('\\bibliographystyle')

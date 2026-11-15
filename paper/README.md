@@ -9,6 +9,8 @@
 
 The converter adds the layout the doc cannot hold, and stops or warns rather than guess:
 - figures: each image and its "Figure N." / "Supplementary Figure N." paragraph become a float with a caption;
+- style of Nature Neuroscience: numbered superscript citations (in order of appearance), "Fig. 1c,d" with the
+  figure number as a link, captions "Fig. N | Title." with bold panel letters;
 - citations: "(Author et al., 2024)" and "Author (2024)" become natbib citations to `refs.bib`; a citation or a doc
   reference without a bib entry stops the build, and the doc's reference list is checked against the cited entries;
 - equations: centred equation paragraphs are typeset from their LaTeX version in `EQUATIONS` only if the doc's text is
