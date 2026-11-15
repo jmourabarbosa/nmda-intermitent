@@ -56,4 +56,5 @@ C3. **tau_N is fixed at 150 ms** (`ratemodel.FIXED`; the fit has six free parame
 | synthetic validation, 24 sessions | `readout_suppl_handoff/data/synthetic_sessions.csv` | identical |
 
 
-Figures: all the Google Doc's figures were replaced by the code's.
+Figures: the Google Doc's figures are the code's, except Supplementary Fig. 1, whose image predates the single
+reference calibration (panels a, c and d differ slightly).
