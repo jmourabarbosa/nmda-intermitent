@@ -239,7 +239,7 @@ def convert(doc, out_dir, bib):
     ia = next(i for i, p in enumerate(P) if p['plain'] == 'Abstract')
     head = [p for p in P[:ia] if p['plain']]
     title, author, affil = head[0]['tex'], head[1]['tex'], ' '.join(p['tex'] for p in head[2:])
-    out = [PREAMBLE, '\\title{%s}\n\\author{%s\\\\[4pt]\\parbox{0.9\\textwidth}{\\centering\\small %s}}\n\\date{}\n\\begin{document}\n\\maketitle\n'
+    out = [PREAMBLE, '\\title{\\Large %s}\n\\author{%s\\\\[4pt]\\parbox{0.9\\textwidth}{\\centering\\small %s}}\n\\date{}\n\\begin{document}\n\\maketitle\n'
            % (title, author, affil)]
     nfig, section, pending_img, doc_refs, eq_text = 0, '', None, [], []
     i = ia
