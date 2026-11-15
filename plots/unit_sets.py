@@ -1,4 +1,4 @@
-"""On/Off statistics of the seven decoded populations, data vs models (layout of Figs. 2, S2 and S3)."""
+"""On/Off statistics of the seven decoded populations, data vs models (layout of Figs. S2, S3 and S4)."""
 import numpy as np
 
 from nmdaint import readout

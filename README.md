@@ -36,11 +36,12 @@ short-term-plasticity variant), and the spiking ring-attractor network.
 | figure | notebook (`figure_notebooks/`) | runs live (time) | loads from `results/` |
 |---|---|---|---|
 | 1 | `fig1.ipynb` | rate model, read-out (40 s) | the data's On/Off statistics |
-| 2 | `fig2.ipynb` | rate model, read-out of 7 populations (30 s); optional: data decoder on one session | the data's On/Off statistics |
+| 2 | `fig2.ipynb` | rate model read out at varying gain (3 min) | the data's On/Off statistics |
 | 3 | `fig3.ipynb` | single-dip test, mixed model, tau fit (2 min) | per-trial statistics; tau sweep (optional rerun) |
 | 4 | `fig4.ipynb` | network read-out, tuning, PCA, Procrustes (4 min) | network spike counts; the data's Procrustes and PCA plane |
 | S1 | `figS1.ipynb` | read-out, calibration, synthetic validation (3 min) | the data's pre-cue z autocorrelation and one session's delay z |
 | S2, S3 | `figS2.ipynb`, `figS3.ipynb` | control without dips, STP model (1-3 min) | the data's On/Off statistics |
+| S4 | `figS4.ipynb` | rate model, read-out of 7 populations (30 s); optional: data decoder on one session | the data's On/Off statistics |
 
 ## Running
 
@@ -49,7 +50,7 @@ github.com/jmourabarbosa/panichello. By default they are read from `../panichell
 
 ```
 pip install -e .                    # Python 3.11-3.13; versions in requirements.txt
-jupyter notebook figure_notebooks/  # the figures: about 12 min for all seven
+jupyter notebook figure_notebooks/  # the figures: about 15 min for all eight
 
 # only to recompute results/ (not needed for the notebooks):
 python scripts/recordings.py        # decoders of the recordings, ~1.5-4 h on 4 cores (needs the data)

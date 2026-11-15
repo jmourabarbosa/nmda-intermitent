@@ -1,7 +1,7 @@
 """Everything computed from the recordings (about 4 h on 4 cores; sessions are cached in cache/recordings/).
 
 results/recordings/
-  readout_per_session.csv   On/Off statistics per session, decoded population and random draw (Figs. 2, S2, S3)
+  readout_per_session.csv   On/Off statistics per session, decoded population and random draw (Figs. 2, S2-S4)
   readout_histograms.csv    state-length counts pooled over sessions, per decoded population (model fit)
   per_trial.csv             per-trial Off statistics and cue of correct and error trials, all units (Fig. 3b-d)
   precue_acf.csv            autocorrelation of the pre-cue z of each decoded population, random draws averaged (Fig. S1b)

@@ -121,6 +121,21 @@ def reference(p, ses):
 
 
 
+def gain_sweep(out, rho, factors, seed=0):
+    """The simulated trials of an evaluate() output read out at the all-units gain x each factor, with noise share
+    rho: one row per gain with the decoding strength (mu_on) and the On/Off statistics."""
+    dw, tz = rate_diff(out['sim'])
+    rng = np.random.default_rng(seed)
+    delay, valid = (tz >= 500) & (tz <= 1400), (tz >= 0) & (tz <= 1400)
+    eta, thr = noise(dw.shape, rho, rng), null_threshold(dw.shape, rho, rng)
+    rows = []
+    for f in factors:
+        z = f * out['sets']['all']['gain'] * dw + eta
+        st = onoff.stats(onoff.label(z, thr, valid), delay)
+        rows.append(dict(factor=f, mu_on=onoff.mu_on(z[:, delay], rng), **{k: v for k, v in st.items() if k[:2] != 'h_'}))
+    return pd.DataFrame(rows)
+
+
 def summary(out, ses, hist):
     """One row per decoded population of an evaluate() output: memory, gain, fit loss and the On/Off statistics."""
     keys = ('n_off', 'off_median', 'off_mean', 'frac_off', 'n_on', 'on_median', 'on_mean', 'frac_on')
