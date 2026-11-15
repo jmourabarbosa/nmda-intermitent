@@ -3,7 +3,8 @@
 The decoder's z score is modelled as z(t) = c dr(t) + eta(t):
   dr    cued minus uncued pool rate in 100 ms windows every 10 ms, as the recordings' rates;
   c     read-out gain, not fitted: for each decoded population it is set so that the model's decoding strength
-        (onoff.mu_on of the delay z) equals the data's mean over sessions;
+        (onoff.mu_on of the delay z) equals the data's mean over sessions; reference() calibrates the gains that
+        every analysis of the fitted models uses;
   eta   unit-variance noise with the autocorrelation of overlapping 100 ms windows plus a constant per-trial offset
         holding a share RHO of the variance, per decoded population (its pre-cue z autocorrelation at 200 ms).
 States are labelled as in the recordings (onoff.label); the On threshold comes from pure noise eta.
@@ -20,6 +21,7 @@ STEP, WIN = 10, 100
 SETS = {'top 5': ('top', 5), 'top 20': ('top', 20), 'top 50': ('top', 50), 'rand 5': ('random', 5),
         'rand 20': ('random', 20), 'rand 50': ('random', 50), 'all': ('all', None)}
 GAIN_GRID = 10 ** np.linspace(-2.6, -0.3, 10)
+REF_TRIALS, REF_SEED = 2112, 1                   # the reference calibration of the gains
 # fit loss: (data column, model key, scale) of six statistics, and the weight of the length-distribution term
 LOSS_STATS = (('off_per_trial', 'n_off', 0.3), ('off_mean_ms', 'off_mean', 20.0), ('frac_off', 'frac_off', 0.05),
               ('on_per_trial', 'n_on', 0.3), ('on_mean_ms', 'on_mean', 20.0), ('frac_on', 'frac_on', 0.05))
@@ -88,7 +90,8 @@ def gain_for(target, mus, grid=GAIN_GRID):
 
 def evaluate(p, ses, n_trials=1056, seed=0, sets=tuple(SETS), sim=None, gains=None):
     """Simulate the model (or use sim) and read it out for each decoded population: memory correct, and per set the
-    gain, z, states and their statistics. gains: fixed gain per set instead of calibrating to the data."""
+    gain (and the calibration curve mus over GAIN_GRID), z, states and their statistics. gains: fixed gain per set
+    instead of calibrating to the data."""
     sim = ratemodel.simulate(p, n_trials, seed=seed * 100 + 1) if sim is None else sim
     dw, tz = rate_diff(sim)
     rng = np.random.default_rng(seed * 100 + 2)
@@ -107,8 +110,14 @@ def evaluate(p, ses, n_trials=1056, seed=0, sets=tuple(SETS), sim=None, gains=No
         eta, mus, thr = cache[RHO[lab]]
         c = gain_for(ses[lab]['mu_on'].mean(), mus) if gains is None else gains[lab]
         state = onoff.label(c * dw + eta, thr, valid)
-        out['sets'][lab] = dict(gain=c, z=c * dw + eta, state=state, **onoff.stats(state, delay))
+        out['sets'][lab] = dict(gain=c, mus=mus, z=c * dw + eta, state=state, **onoff.stats(state, delay))
     return out
+
+
+def reference(p, ses):
+    """The reference read-out of model p: REF_TRIALS trials, seed REF_SEED, all decoded populations. Its gains are the
+    ones used for the model everywhere."""
+    return evaluate(p, ses, n_trials=REF_TRIALS, seed=REF_SEED)
 
 
 
