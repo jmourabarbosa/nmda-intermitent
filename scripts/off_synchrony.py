@@ -1,7 +1,7 @@
 """Are Off states shared between two halves of the units? In each session, the cue is decoded separately from the
 two random halves of the units (population.unit_halves, the split of Fig. 4), and the delay time points at which
 one half is Off are compared with those of the other half, in the same trial and in another trial with the same cue
-(population.off_synchrony). About 40 min on 4 cores; sessions are cached in cache/off_synchrony/.
+(population.off_synchrony). About 6 min on 4 cores; sessions are cached in cache/off_synchrony/.
 Writes results/recordings/off_synchrony.csv.
 
 usage: python scripts/off_synchrony.py [--jobs 4]

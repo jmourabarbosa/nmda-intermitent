@@ -54,6 +54,7 @@ jupyter notebook figure_notebooks/  # the figures: about 15 min for all eight
 
 # only to recompute results/ (not needed for the notebooks):
 python scripts/recordings.py        # decoders of the recordings, ~1.5-4 h on 4 cores (needs the data)
+python scripts/off_synchrony.py     # Off states of two halves of the units, ~6 min (needs the data)
 python scripts/tau_sweep.py         # ~20 min, after recordings
 python scripts/spiking.py           # network simulations, ~2 h
 python scripts/fit.py               # refits of both models, ~2 h per run (the figures use the published fits)
