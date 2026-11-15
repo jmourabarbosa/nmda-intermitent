@@ -13,6 +13,10 @@ the ring of cue means of one trial half and the per-cue centroids of the other h
 and before the cue (mean activity over those time points), in all held-out units ('full') and in the 7 PCs of the
 cue means ('pcs'), averaged over the two halves; chance from 50 shuffles of the cue labels within each half.
 Normalised similarity = 1 - disparity / shuffle disparity (0 = chance, 1 = identical shape).
+
+off_synchrony: do the decoders of the two unit halves go Off together? Fraction of the delay time points at which
+one half is Off where the other half is Off too, against the same with the other half's states taken from another
+trial with the same cue.
 """
 import numpy as np
 from scipy.spatial import procrustes as sp_procrustes
@@ -24,6 +28,22 @@ def unit_halves(n_units):
     """Labelling units (half 1) and analysed units (half 2)."""
     pu = np.random.default_rng(1).permutation(n_units)
     return np.sort(pu[:n_units // 2]), np.sort(pu[n_units // 2:])
+
+
+def off_synchrony(st1, st2, cue, rng, n_perm=100):
+    """P(the other half Off | one half Off) over the time points of st1, st2 (trials x times, states of the two
+    unit halves), averaged over the two directions: in the same trial, and with the other half's states taken from
+    another trial with the same cue (n_perm permutations of the trials within each cue, averaged)."""
+    a, b = st1 == -1, st2 == -1
+    both = lambda x, y: ((x & y).sum() / x.sum() + (x & y).sum() / y.sum()) / 2
+    other = []
+    for _ in range(n_perm):
+        perm = np.arange(len(cue))
+        for c in np.unique(cue):
+            idx = np.flatnonzero(cue == c)
+            perm[idx] = np.roll(rng.permutation(idx), 1) if len(idx) > 1 else idx
+        other.append(both(a, b[perm]))
+    return float(both(a, b)), float(np.mean(other))
 
 
 def trial_halves(cue, rng):
