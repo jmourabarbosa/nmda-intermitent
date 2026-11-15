@@ -37,7 +37,7 @@ def session(k, seed):
     tt = sim['t'][0] + STEP * np.arange(n_b - w + 1) + WIN / 2          # window centres
     keep = (tt >= -250) & (tt <= 1400)
     tt = tt[keep]
-    sw = (tt >= 0) & (tt <= 1400)
+    sw, dsel = onoff.windows(tt)                         # labelled time points, delay
 
     def pipeline(r):
         """New trial gains and Poisson spikes from the same rates, decoded as the recordings."""
@@ -61,7 +61,7 @@ def session(k, seed):
     z_p2, _ = pipeline(np.random.default_rng(seed + 500))
     dw, tz = readout.rate_diff(sim, t_from=-250)
     dw = dw[:, np.isin(tz, tt)]
-    dsel, pre = (tt >= 500) & (tt <= 1400), tt < 0
+    pre = tt < 0
     x = z_p[:, pre] - z_p[:, pre].mean()
     rho = float(np.clip((x[:, :-20] * x[:, 20:]).mean() / (x * x).mean(), 0, 0.9))
     mu_pipe = onoff.mu_on(z_p[:, dsel], rng)
@@ -69,7 +69,7 @@ def session(k, seed):
     c = readout.gain_for(mu_pipe, readout.gain_curve(dw, eta, dsel, rng, GRID), GRID)
     z_s = c * dw + eta
     st_s = onoff.label(z_s[:, sw], readout.null_threshold(dw.shape, rho, rng))
-    del_sw = (tt[sw] >= 500) & (tt[sw] <= 1400)
+    del_sw = dsel[sw]
     corr = lambda a, b_: float(np.corrcoef(a[:, dsel].ravel(), b_[:, dsel].ravel())[0, 1])
     out = dict(seed=seed, k=k, rho=rho, mu_on_pipeline=mu_pipe, gain_c=c, corr_z_pipeline_repeat=corr(z_p, z_p2),
                corr_z_pipeline_vs_shortcut=corr(z_p, z_s))

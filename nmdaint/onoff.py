@@ -16,6 +16,11 @@ MIN_OFF = 5                # time points
 STATE_WIN, DELAY = (0, 1400), (500, 1400)
 
 
+def windows(t):
+    """Boolean masks over the time points t (ms from cue onset): those that are labelled, and the delay."""
+    return (t >= STATE_WIN[0]) & (t <= STATE_WIN[1]), (t >= DELAY[0]) & (t <= DELAY[1])
+
+
 def runs(mask):
     """(start, stop) index pairs of the runs of True in a 1-d boolean array."""
     a = np.diff(np.r_[0, mask.astype(int), 0])

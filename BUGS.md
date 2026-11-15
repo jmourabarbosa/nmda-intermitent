@@ -10,7 +10,7 @@ Google Doc; those items are no longer listed here.
 
 A1. **Two gains for the same read-out.** Every figure uses the all-units gain of the reference calibration
    (`readout.reference`, 2,112 trials, seed 1): 0.0512. The tau sweep behind Fig. 3c, d uses its own calibration
-   (`memory.reference_gain`, 1,056 trials, seed 0): 0.0487, as in the paper. With 0.0512 the fit gives tau_N 125 ms
+   (`memory.sweep_gain`, 1,056 trials, seed 0): 0.0487, as in the paper. With 0.0512 the fit gives tau_N 125 ms
    instead of 123 ms and the bootstrap interval 102-932 ms instead of 101-190 ms: its upper end is fragile, as 1.8%
    (with 0.0512, 3.3%) of the resamples find no decline of performance with time Off and go to the flat end of the
    tau grid.

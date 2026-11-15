@@ -2,6 +2,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from nmdaint.onoff import runs
+
 C_ON, C_OFF, INK, GREY, LIGHT, C_UN = '#e8474a', '#3cb4c9', '#000000', '#7f7f7f', '#d9d9d9', '#8c8c8c'
 C_STP, C_FIT, C_NET = '#2b83ba', '#d7301f', '#2b7bba'
 RC = {'font.family': 'sans-serif', 'font.sans-serif': ['Arial', 'Helvetica', 'Liberation Sans'],
@@ -17,11 +19,6 @@ plt.rcParams.update(RC)
 
 def letter(ax, txt, x=-0.08, y=1.06):
     ax.text(x, y, txt, transform=ax.transAxes, fontsize=10, weight='bold', va='bottom')
-
-
-def runs(mask):
-    a = np.diff(np.r_[0, mask.astype(int), 0])
-    return list(zip(np.where(a == 1)[0], np.where(a == -1)[0]))
 
 
 def shade(ax, tz, state, step=10):

@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from nmdaint import onoff
-from .style import C_NET, C_OFF, C_ON, GREY, INK, LIGHT, letter, limits, runs
+from .style import C_NET, C_OFF, C_ON, GREY, INK, LIGHT, letter, limits
 
 
 
 def shade(ax, t, state, step):
     for lab, c in ((1, C_ON), (-1, C_OFF)):
-        for a, b in runs(state == lab):
+        for a, b in onoff.runs(state == lab):
             ax.axvspan(t[a] - step / 2, t[b - 1] + step / 2, color=c, alpha=0.15, lw=0)
 
 

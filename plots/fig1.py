@@ -1,9 +1,10 @@
-"""Figure 1: an example trial of the rate model read out at three gains, and the On/Off length distributions."""
+"""Figure 1: an example trial of the rate model read out at three gains, the On/Off length distributions at the
+calibrated gain and the mean lengths at the three gains."""
 import matplotlib.pyplot as plt
 import numpy as np
 
 from nmdaint import onoff
-from .style import C_OFF, C_ON, C_UN, GREY, INK, LIGHT, letter, runs, shade
+from .style import C_OFF, C_ON, C_UN, GREY, INK, LIGHT, letter, shade
 
 SHADES = {'off': ('#16606d', C_OFF, '#86d3e0'), 'on': ('#9c1215', C_ON, '#f39a9c')}
 Z_INK = ('#7f7f7f', INK, '#bdbdbd')
@@ -37,7 +38,7 @@ def draw(e, lengths, gains, quiet, cue_dur, r_max):
     a.text(quiet / 2, e['sc'][mid].max() + 0.04, 'NMDA', fontsize=7.5, ha='center', va='bottom')
     a.text(quiet / 2, e['rc'][mid].min() / r_max - 0.04, 'Rate', fontsize=7.5, ha='center', va='top')
     for lab, v, c in (('Off', -1, C_OFF), ('On', 1, C_ON)):  # the first Off state, the first On state with dips
-        first = [(a0, b0) for a0, b0 in runs(state == v) if v == -1 or tz[a0] > quiet][:1]
+        first = [(a0, b0) for a0, b0 in onoff.runs(state == v) if v == -1 or tz[a0] > quiet][:1]
         for a0, b0 in first:
             a.text((tz[a0] + tz[b0 - 1]) / 2, 0.96, lab, color=c, fontsize=7.5, va='top', ha='center')
     letter(a, 'a')
@@ -66,20 +67,19 @@ def draw(e, lengths, gains, quiet, cue_dur, r_max):
         ax.set_xlim(t[0], t[-1] + 1)
     for ax in (a, b):
         ax.tick_params(labelbottom=False)
-    # b: length distributions at each gain, fraction of states in 40 ms bins
+    # b: length distribution at the calibrated gain (fraction of states in 40 ms bins); triangles: mean length at each gain
     for j, (name, c) in enumerate((('off', C_OFF), ('on', C_ON))):
         h = fig.add_subplot(gh[j], sharex=fig.axes[-1] if j else None)
-        top = 0
+        cnt = lengths[next(k for k, f in gains.items() if f == 1)][f'h_{name}']
+        hm = (cnt[:30][0::2] + cnt[:30][1::2]) / max(cnt.sum(), 1)
+        h.bar(np.arange(0, 600, 40), hm, width=40, align='edge', color=c, lw=0)
+        top = np.ceil(hm.max() * 10) / 10
         for i, (key, _, lab) in enumerate(GAINS):
-            cnt = lengths[key][f'h_{name}']
-            hm = (cnt[:30][0::2] + cnt[:30][1::2]) / max(cnt.sum(), 1)
-            w = 40 / len(GAINS)
-            h.bar(np.arange(0, 600, 40) + i * w, hm, width=w, align='edge', color=SHADES[name][i], lw=0)
-            top = max(top, hm.max())
+            h.plot(lengths[key][f'{name}_mean'], 0.96 * top, 'v', ms=4.5, color=SHADES[name][i], mec=INK, mew=0.4, clip_on=False,
+                   zorder=5)
             h.text(0.97, 0.66 - 0.17 * i, f"{lab}, {float(lengths[key][f'n_{name}']):.1f}/trial", transform=h.transAxes,
                    ha='right', va='top', color=SHADES[name][i], fontsize=6.5)
         h.set_xlim(0, 620); h.set_xticks([0, 200, 400, 600])
-        top = np.ceil(top * 10) / 10
         h.set_ylim(0, top); h.set_yticks([0, top / 2, top], ['0', '', f'{top:g}'])
         h.set_ylabel('Fraction\nof states', labelpad=-14)
         h.text(0.97, 0.9, f'{name.capitalize()} states', transform=h.transAxes, ha='right', va='top', color=c, fontsize=7.5)

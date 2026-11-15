@@ -50,7 +50,7 @@ def decode(X, cue, rng, units):
 def states(X, cue, rng, units, tz, valid=None, halves=None):
     """z and On/Off states (trials, times) of the decoder on `units`, or with halves = (half, units of half 0, units
     of half 1) different cells for the trials of each half."""
-    valid = (tz >= 0) & (tz <= 1400) if valid is None else valid
+    valid = onoff.windows(tz)[0] if valid is None else valid
     if halves is None:
         z, zn = decode(X, cue, rng, units)
     else:
@@ -71,7 +71,7 @@ def read_session(d, seed):
     for c in range(8):                 # trial halves (not used by the all-units decoder; they fix the random sequence)
         rng.permutation(np.where(cue == c)[0])
     z, st = states(X, cue, rng, np.where(X.sum((0, 1)) > 0)[0], tz)
-    delay = (tz >= 500) & (tz <= 1400)
+    delay = onoff.windows(tz)[1]
     return dict(z=z, state=st, tz=tz, **onoff.stats(st, delay), mu_on=onoff.mu_on(np.nan_to_num(z)[:, delay], rng))
 
 
@@ -82,7 +82,7 @@ def tuning(X, tz, cue, rng, n_rep=10):
     (largest On + Off value), minus the same with shuffled cue labels (aligned to its own maximum); halves swapped;
     n_rep random splits, averaged per cell. Returns {'on', 'off'}: (cells, 8 cue offsets from the preferred cue)."""
     Z = zscore(X)
-    valid, delay = (tz >= 0) & (tz <= 1400), (tz >= 500) & (tz <= 1400)
+    valid, delay = onoff.windows(tz)
     n_cells = X.shape[2]
     curves, ids = {'on': [], 'off': []}, []
     for _ in range(n_rep):

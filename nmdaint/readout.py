@@ -95,7 +95,7 @@ def evaluate(p, ses, n_trials=1056, seed=0, sets=tuple(SETS), sim=None, gains=No
     sim = ratemodel.simulate(p, n_trials, seed=seed * 100 + 1) if sim is None else sim
     dw, tz = rate_diff(sim)
     rng = np.random.default_rng(seed * 100 + 2)
-    delay, valid = (tz >= 500) & (tz <= 1400), (tz >= 0) & (tz <= 1400)
+    valid, delay = onoff.windows(tz)
     out = dict(mem=float(ratemodel.memory_correct(sim).mean()), sim=sim, tz=tz, sets={})
     cache = {}
     # the 20-unit and all-units populations draw first: their noise stays the one drawn when every top and every
@@ -126,7 +126,7 @@ def gain_sweep(out, rho, factors, seed=0):
     rho: one row per gain with the decoding strength (mu_on) and the On/Off statistics."""
     dw, tz = rate_diff(out['sim'])
     rng = np.random.default_rng(seed)
-    delay, valid = (tz >= 500) & (tz <= 1400), (tz >= 0) & (tz <= 1400)
+    valid, delay = onoff.windows(tz)
     eta, thr = noise(dw.shape, rho, rng), null_threshold(dw.shape, rho, rng)
     rows = []
     for f in factors:

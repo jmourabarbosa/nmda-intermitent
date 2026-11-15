@@ -117,8 +117,7 @@ class Session:
         self.Z, self.Z_err = zscore(R), zscore(Re, R)
         del s, R, Re
         self.n_tr, _, self.n_units = self.Z.shape
-        self.sw = (self.t >= onoff.STATE_WIN[0]) & (self.t <= onoff.STATE_WIN[1])         # labelled time points
-        self.delay = (self.t >= onoff.DELAY[0]) & (self.t <= onoff.DELAY[1])
+        self.sw, self.delay = onoff.windows(self.t)                 # labelled time points, delay
         self.half = trial_halves(self.cue, rng)
         delay_rate = self.Z[:, self.delay].mean(1)
         self.F = [np.nan_to_num(f_oneway(*[delay_rate[(self.half == h) & (self.cue == c)] for c in range(8)],

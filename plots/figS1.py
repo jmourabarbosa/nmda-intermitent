@@ -6,7 +6,7 @@ from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 from scipy.stats import norm
 
 from nmdaint import onoff, readout
-from .style import C_OFF, C_ON, GREY, INK, LIGHT, letter, limits, runs, shade
+from .style import C_OFF, C_ON, GREY, INK, LIGHT, letter, limits, shade
 
 C_RO, C_REP = '#2b83ba', GREY
 POPC = {'all': INK, 'top 20': '#636363', 'rand 20': '#bdbdbd'}
@@ -48,7 +48,7 @@ def draw(m, acf, data_z, syn, E, ses, rho, targets):
     ax = [fig.add_subplot(sub[0])]
     ax += [fig.add_subplot(sub[i], sharex=ax[0]) for i in (1, 2, 3)]
     for a in ax[:3]:
-        for i, j in runs(m['m'] < 0.99):
+        for i, j in onoff.runs(m['m'] < 0.99):
             a.axvspan(t1[i], t1[j - 1], color=LIGHT, alpha=0.7, lw=0)
     ax[0].plot(t1, m['rc'], color=INK, lw=0.8)
     ax[0].plot(t1, m['ru'], color=GREY, lw=0.8)
@@ -126,7 +126,7 @@ def draw(m, acf, data_z, syn, E, ses, rho, targets):
     fx = fig.add_subplot(gs[2, 0:2])
     tt = E['tt']
     tsw = tt[(tt >= 0) & (tt <= 1400)]
-    for i, j in runs(E['dip']):
+    for i, j in onoff.runs(E['dip']):
         fx.axvspan(tsw[i], tsw[j - 1], color=LIGHT, alpha=0.7, lw=0)
     fx.plot(tt, E['z_pipeline'], color=INK, lw=0.8)
     fx.plot(tt, E['z_shortcut'], color=C_RO, lw=0.8)

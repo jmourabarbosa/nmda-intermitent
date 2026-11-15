@@ -23,7 +23,7 @@ def single_dip(p, lengths=LENGTHS, n=N_DIP, onset=ONSET):
                      for i, L in enumerate(lengths)])
 
 
-def reference_gain(p, ses):
+def sweep_gain(p, ses):
     """All-units read-out gain for the tau sweep, calibrated on its own simulation (1,056 trials, seed 0), as for the
     paper's Fig. 3 (BUGS.md, A1: the other figures use readout.reference, 0.0512 instead of 0.0487)."""
     return readout.evaluate(p, ses, n_trials=1056, seed=0, sets=('all',))['sets']['all']['gain']
@@ -38,9 +38,10 @@ def tau_sweep(p, tau, gain, n_trials=N_SWEEP):
     for b in range(n_trials // BATCH):
         sim = ratemodel.simulate(p, BATCH, seed=90000 + b)
         dw, tz = readout.rate_diff(sim)
+        valid, delay = onoff.windows(tz)
         if thr is None:
             thr = readout.null_threshold(dw.shape, rho, rng)
-        state = onoff.label(gain * dw + readout.noise(dw.shape, rho, rng), thr, (tz >= 0) & (tz <= 1400))
-        frac.append((state[:, (tz >= 500) & (tz <= 1400)] == -1).mean(1))
+        state = onoff.label(gain * dw + readout.noise(dw.shape, rho, rng), thr, valid)
+        frac.append((state[:, delay] == -1).mean(1))
         held.append(ratemodel.memory_correct(sim))
     return np.concatenate(frac), np.concatenate(held)

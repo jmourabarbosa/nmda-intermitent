@@ -14,7 +14,7 @@ from nmdaint import behaviour, memory, paths, ratemodel, readout
 def main():
     ses, _ = readout.load_data()
     p = ratemodel.params('nmda')
-    gain = memory.reference_gain(p, ses)
+    gain = memory.sweep_gain(p, ses)
     sweep = Parallel(n_jobs=4)(delayed(memory.tau_sweep)(p, tau, gain) for tau in memory.TAUS)
     rows = []
     for tau, (frac, held) in zip(memory.TAUS, sweep):
