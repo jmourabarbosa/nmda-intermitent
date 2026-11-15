@@ -24,8 +24,9 @@ def single_dip(p, lengths=LENGTHS, n=N_DIP, onset=ONSET):
 
 
 def reference_gain(p, ses):
-    """All-units read-out gain of the model, from its reference calibration (readout.reference)."""
-    return readout.reference(p, ses)['sets']['all']['gain']
+    """All-units read-out gain for the tau sweep, calibrated on its own simulation (1,056 trials, seed 0), as for the
+    paper's Fig. 3 (BUGS.md, A1: the other figures use readout.reference, 0.0512 instead of 0.0487)."""
+    return readout.evaluate(p, ses, n_trials=1056, seed=0, sets=('all',))['sets']['all']['gain']
 
 
 def tau_sweep(p, tau, gain, n_trials=N_SWEEP):

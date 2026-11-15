@@ -8,6 +8,12 @@ Google Doc; those items are no longer listed here.
 
 ## A. Inconsistencies kept in the code (so that the published numbers are unchanged)
 
+A1. **Two gains for the same read-out.** Every figure uses the all-units gain of the reference calibration
+   (`readout.reference`, 2,112 trials, seed 1): 0.0512. The tau sweep behind Fig. 3c, d uses its own calibration
+   (`memory.reference_gain`, 1,056 trials, seed 0): 0.0487, as in the paper. With 0.0512 the fit gives tau_N 125 ms
+   instead of 123 ms and the bootstrap interval 102-932 ms instead of 101-190 ms: its upper end is fragile, as 1.8%
+   (with 0.0512, 3.3%) of the resamples find no decline of performance with time Off and go to the flat end of the
+   tau grid.
 A2. **Off threshold.** The recordings use z < 0.8416 (P > 0.20 exactly); the rate model and the spiking network use
    z < 0.84 (`recordings.OFF_Z`, `onoff.OFF_Z`).
 A3. **State-length histograms.** The data's table puts states of exactly 600 ms in the 580-600 ms bin, the model in
@@ -39,8 +45,8 @@ C3. **tau_N is fixed at 150 ms** (`ratemodel.FIXED`; the fit has six free parame
 | per-trial statistics, 15,468 correct and error trials | `behaviour_handoff/data/per_trial_correct_and_error.csv` | identical |
 | pre-cue z autocorrelation at 200 ms | `RHO` of the read-out | all, top 20: 0.346, 0.089, identical; random 20: 0.111 instead of 0.107 (all random draws averaged instead of the first); now also computed for top/random 5 and 50, which used the 20-unit values |
 | GLMM fixed effects and session weights | `joint_glmm.csv`, `joint_glmm_session_weights.csv` | equal to 1e-6 (optimiser) |
-| tau sweep, 17 tau_N x 30,000 trials | `figures/off_vs_memory/nmda/tau_sweep/*.npz` | identical with the original's gain (0.0487); now uses the reference gain 0.0512 (`readout.reference`, as every figure) |
-| tau_N fit and bootstrap | `fig3_behaviour_tau.py` | 123 ms, 95% interval 101-190 ms, identical with the original's gain; with the reference gain 125 ms, 102-932 ms (3.3% of the resamples, 1.8% before, go to the flat end of the tau grid) |
+| tau sweep, 17 tau_N x 30,000 trials | `figures/off_vs_memory/nmda/tau_sweep/*.npz` | identical |
+| tau_N fit and bootstrap | `fig3_behaviour_tau.py` | 123 ms, 95% interval 101-190 ms, identical |
 | rate model, NMDA and STP | `paper_model/model.py`, `model_ours_stp.py` | bit-identical traces |
 | model read-out, all populations, 4 conditions | `readout.evaluate`, `control_no_dips.py`, `fig_unit_sets_nmda_stp.py` | identical states and statistics |
 | single-dip test, both models | `single_dip_readout_trials.npz` | identical |
