@@ -53,9 +53,9 @@ def draw(e, lengths, gains, quiet, cue_dur, r_max):
         d.plot(tz, f * e['gain'] * e['dw'] + e['eta'], color=c, lw=0.9 if f == 1.0 else 0.7, zorder=3 if f == 1.0 else 2)
     for q, ((_, _, lab), c) in enumerate(zip(GAINS, Z_INK)):        # one row per gain, right of the panel
         d.text(1.005, 0.95 - 0.15 * q, lab + ' gain', transform=d.transAxes, color=c, fontsize=7.5, va='top')
-    for y, c, txt in ((0, GREY, ''), (onoff.ON_Z, C_ON, 'P < 0.05'), (onoff.OFF_Z, C_OFF, 'P > 0.20')):
+    for y, c, txt, va in ((0, GREY, '', 'center'), (onoff.ON_Z, C_ON, 'P < 0.05', 'bottom'), (onoff.OFF_Z, C_OFF, 'P > 0.20', 'top')):
         d.axhline(y, color=c, ls=(0, (3, 2)), lw=0.6)
-        d.text(1.005, y, txt, transform=d.get_yaxis_transform(), color=c, fontsize=7.5, va='center')
+        d.text(1.005, y, txt, transform=d.get_yaxis_transform(), color=c, fontsize=7.5, va=va)   # labels above and below
     z = e['gain'] * e['dw'] + e['eta']
     top = max(gains.values()) * e['gain'] * e['dw'].max() + e['eta'].max() + 0.3
     d.set_ylim(z.min() - 0.3, top)
