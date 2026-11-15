@@ -1,7 +1,6 @@
 """Figure 1: an example trial of the rate model read out at three gains, and the On/Off length distributions."""
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.offsetbox import AnchoredOffsetbox, HPacker, TextArea
 
 from nmdaint import onoff
 from .style import C_OFF, C_ON, C_UN, GREY, INK, LIGHT, letter, runs, shade
@@ -51,9 +50,8 @@ def draw(e, lengths, gains, quiet, cue_dur, r_max):
     shade(d, tz, state)
     for (_, f, _), c in zip(GAINS, Z_INK):
         d.plot(tz, f * e['gain'] * e['dw'] + e['eta'], color=c, lw=0.9 if f == 1.0 else 0.7, zorder=3 if f == 1.0 else 2)
-    box = HPacker(children=[TextArea(lab + ' gain', textprops=dict(color=c, fontsize=7.5)) for (_, _, lab), c in zip(GAINS, Z_INK)],
-                  align='baseline', pad=0, sep=7)
-    d.add_artist(AnchoredOffsetbox('upper right', child=box, pad=0.1, borderpad=0.3, frameon=False))
+    for q, ((_, _, lab), c) in enumerate(zip(GAINS, Z_INK)):        # one row per gain, right of the panel
+        d.text(1.005, 0.95 - 0.15 * q, lab + ' gain', transform=d.transAxes, color=c, fontsize=7.5, va='top')
     for y, c, txt in ((0, GREY, ''), (onoff.ON_Z, C_ON, 'P < 0.05'), (onoff.OFF_Z, C_OFF, 'P > 0.20')):
         d.axhline(y, color=c, ls=(0, (3, 2)), lw=0.6)
         d.text(1.005, y, txt, transform=d.get_yaxis_transform(), color=c, fontsize=7.5, va='center')
@@ -62,7 +60,6 @@ def draw(e, lengths, gains, quiet, cue_dur, r_max):
     d.set_ylim(z.min() - 0.3, top)
     d.set_yticks([0, 5, 10], ['0', '', '10']) if top < 15 else None
     d.set_ylabel('Decoding z')
-    d.set_title(r'$z(t) = c\,[r_\mathrm{cued}(t) - r_\mathrm{uncued}(t)] + \eta(t)$', fontsize=7.5, loc='left', pad=2)
     d.set_xlabel('Time from cue onset (ms)')
     for ax in (a, b, d):
         ax.axvline(quiet, color=GREY, ls=(0, (3, 2)), lw=0.6)
