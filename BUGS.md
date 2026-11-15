@@ -26,6 +26,11 @@ B1. **The pre-cue z SD of 1.06 per decoded population** (Methods, read-out) come
 B2. **"With depression, On states were too short (112 vs 172 ms in the data)"** (Methods, STP model): 172 ms is the
    data's mean On length; 112 ms comes from the STP model with depression, which was removed from the code (C2).
 
+B3. **Synchrony of Off states between two halves of the units** (Results: Off in one half when the other is Off at
+   66 +- 2% of time points against 51 +- 2% across trials, p = 4e-13). The repository decodes only one random half of
+   the units per session (for the population analyses of Fig. 4), so this comparison is not computed here, and the
+   Methods do not describe it.
+
 ## C. Other notes
 
 C1. `paper/main.tex` (paper branch) is older than the Google Doc (different title, captions); the figures were
@@ -56,5 +61,4 @@ C3. **tau_N is fixed at 150 ms** (`ratemodel.FIXED`; the fit has six free parame
 | synthetic validation, 24 sessions | `readout_suppl_handoff/data/synthetic_sessions.csv` | identical |
 
 
-Figures: the Google Doc's figures are the code's, except Supplementary Fig. 1, whose image predates the single
-reference calibration (panels a, c and d differ slightly).
+Figures: all the Google Doc's figures are the code's.
