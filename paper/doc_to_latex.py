@@ -42,6 +42,7 @@ EQUATIONS = {
         r'-\frac{s_\mathrm{NMDA}}{\tau_\mathrm{NMDA}} + \alpha\, x (1 - s_\mathrm{NMDA}),',
     '0 = −si + β (ui/U) ri (1 − si)': r'0 = -s_i + \beta\, (u_i/U)\, r_i (1 - s_i)',
     'τf dui/dt = −(ui − U) + τf U ri (1 − ui)': r'\tau_f \frac{du_i}{dt} = -(u_i - U) + \tau_f U r_i (1 - u_i)',
+    'si = β (ui/U) ri / (1 + β (ui/U) ri)': r's_i = \frac{\beta\, (u_i/U)\, r_i}{1 + \beta\, (u_i/U)\, r_i}',
     'Wij = J− + (J+ − J−) exp(−(θi − θj)2/2σ2),':
         r'W_{ij} = J^- + (J^+ - J^-) \exp\!\left(-\frac{(\theta_i - \theta_j)^2}{2\sigma^2}\right),',
 }
