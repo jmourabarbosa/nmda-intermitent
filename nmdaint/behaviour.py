@@ -111,7 +111,7 @@ def glmm(trials):
     d['session'] = d['session'].astype(str)
     d = zscore_within(d, STATS)
     covariates = np.column_stack([(d[col] == v).values.astype(float) for col in ('monkey', 'cue')
-                                  for v in sorted(d[col].unique())[1:]])    # monkey (none with one) and cue location
+                                  for v in sorted(d[col].unique())[1:]])    # monkey and cue location
     Z = np.column_stack([np.ones(len(d))] + [d['z_' + s].values for s in STATS])   # intercept and the four statistics
     y, groups = d.error.values, d.session.values
     m = GLMM(np.column_stack([Z, covariates]), Z, y, groups).fit()
