@@ -7,6 +7,8 @@
    `figures/figNN.png`, in the doc's order.
 3. `pdflatex main && bibtex main && pdflatex main && pdflatex main`
 
+`main_noAI.pdf` is the same paper without the AI methodology statement: `python doc_to_latex.py doc.json --exclude "AI methodology" --name main_noAI`.
+
 The converter adds the layout the doc cannot hold, and stops or warns rather than guess:
 - figures: each image and its "Figure N." / "Supplementary Figure N." paragraph become a float with a caption;
 - style of Nature Neuroscience: numbered superscript citations (in order of appearance), "Fig. 1c,d" with the

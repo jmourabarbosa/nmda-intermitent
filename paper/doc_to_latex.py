@@ -9,7 +9,7 @@ The doc is the only source of text. The converter adds the layout the doc cannot
   any other centred paragraph is kept as text and reported, so an edited equation is never replaced silently.
 Pending suggestions count as not accepted (insertions dropped, deletions kept).
 
-Usage: python doc_to_latex.py DOC.json [OUT_DIR]   then: pdflatex main && bibtex main && pdflatex main && pdflatex main
+Usage: python doc_to_latex.py DOC.json [OUT_DIR] [--exclude 'AI methodology'] [--name main_noAI]   then: pdflatex main && bibtex main && pdflatex main && pdflatex main
 """
 import json, os, re, sys, urllib.request
 
@@ -229,7 +229,7 @@ def paragraphs(tab):
                    plain=''.join(plain).strip(), imgs=imgs)
 
 
-def convert(doc, out_dir, bib):
+def convert(doc, out_dir, bib, exclude=(), name='main'):
     tab = doc['tabs'][0]['documentTab']
     idx = bib_index(bib)
     used = set()
@@ -243,8 +243,15 @@ def convert(doc, out_dir, bib):
            % (title, author, affil)]
     nfig, section, pending_img, doc_refs, eq_text = 0, '', None, [], []
     i = ia
+    skipping = False
     while i < len(P):
         p = P[i]; i += 1
+        is_title = p['style'].startswith('HEADING') or (p['tex'].startswith('\\textbf{') and p['tex'].endswith('}')
+                                                       and 0 < len(p['plain']) < 60 and p['tex'].count('\\textbf{') == 1)
+        if is_title:
+            skipping = p['plain'] in exclude
+        if skipping:
+            continue
         if p['style'].startswith('HEADING') and p['plain']:
             if section == 'Abstract':
                 out.append('\\end{abstract}\n')
@@ -311,15 +318,21 @@ def convert(doc, out_dir, bib):
     j = tex.find('\\clearpage\n\\section{Supplementary Figures}')
     if j > 0:   # references before the supplementary figures, as in the doc
         tex = tex[:j] + tex[k:tex.index('\\end{document}')] + tex[j:k] + '\\end{document}\n'
-    open(os.path.join(out_dir, 'main.tex'), 'w').write(tex)
+    open(os.path.join(out_dir, name + '.tex'), 'w').write(tex)
     return nfig, len(used), len(doc_refs)
 
 
 if __name__ == '__main__':
-    d = json.load(open(sys.argv[1]))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('doc'); ap.add_argument('out_dir', nargs='?', default=os.path.dirname(os.path.abspath(__file__)))
+    ap.add_argument('--exclude', action='append', default=[], help='leave out a section by its title, e.g. "AI methodology"')
+    ap.add_argument('--name', default='main', help='output name (NAME.tex)')
+    a = ap.parse_args()
+    d = json.load(open(a.doc))
     d = d.get('content', d)
-    out_dir = sys.argv[2] if len(sys.argv) > 2 else os.path.dirname(os.path.abspath(__file__))
-    nfig, ncit, nref = convert(d, out_dir, os.path.join(out_dir, 'refs.bib'))
+    out_dir = a.out_dir
+    nfig, ncit, nref = convert(d, out_dir, os.path.join(out_dir, 'refs.bib'), set(a.exclude), a.name)
     for w in warnings:
         print('WARNING:', w)
     if unknown:
