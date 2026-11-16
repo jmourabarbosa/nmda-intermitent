@@ -34,12 +34,14 @@ EQUATIONS = {
     'τff dq/dt = −q + m(t)': r'\tau_{\mathit{ff}} \frac{dq}{dt} = -q + m(t)',
     'Cm dV/dt = −gL (V − EL) − Iext − INMDA − IGABA + Icue,':
         r'C_m \frac{dV}{dt} = -g_L (V - E_L) - I_\mathrm{ext} - I_\mathrm{NMDA} - I_\mathrm{GABA} + I_\mathrm{cue},',
-    'Iext = gext sAMPA (V − EE),   INMDA = gNMDA B(V) (V − EE) Σj Wij sNMDA,j,   IGABA = gGABA (V − EI) Σj sGABA,j,':
-        r'\begin{gathered} I_\mathrm{ext} = g_\mathrm{ext}\, s_\mathrm{AMPA} (V - E_E), \\ I_\mathrm{NMDA} = g_\mathrm{NMDA}\, B(V) (V - E_E) '
+    'Iext = gext sAMPA (V − EE),   INMDA = gNMDA B(V) · (V − EE) Σj Wij sNMDA,j,   IGABA = gGABA (V − EI) Σj sGABA,j,':
+        r'\begin{gathered} I_\mathrm{ext} = g_\mathrm{ext}\, s_\mathrm{AMPA} (V - E_E), \\ I_\mathrm{NMDA} = g_\mathrm{NMDA}\, B(V) \cdot (V - E_E) '
         r'\textstyle\sum_j W_{ij}\, s_{\mathrm{NMDA},j}, \\ I_\mathrm{GABA} = g_\mathrm{GABA} (V - E_I) \textstyle\sum_j s_{\mathrm{GABA},j}, \end{gathered}',
     'dx/dt = −x/τx + Σk δ(t − tk),   dsNMDA/dt = −sNMDA/τNMDA + α x (1 − sNMDA),':
         r'\frac{dx}{dt} = -\frac{x}{\tau_x} + \sum_k \delta(t - t_k), \qquad \frac{ds_\mathrm{NMDA}}{dt} = '
         r'-\frac{s_\mathrm{NMDA}}{\tau_\mathrm{NMDA}} + \alpha\, x (1 - s_\mathrm{NMDA}),',
+    '0 = −si + β (ui/U) ri (1 − si)': r'0 = -s_i + \beta\, (u_i/U)\, r_i (1 - s_i)',
+    'τf dui/dt = −(ui − U) + τf U ri (1 − ui)': r'\tau_f \frac{du_i}{dt} = -(u_i - U) + \tau_f U r_i (1 - u_i)',
     'Wij = J− + (J+ − J−) exp(−(θi − θj)2/2σ2),':
         r'W_{ij} = J^- + (J^+ - J^-) \exp\!\left(-\frac{(\theta_i - \theta_j)^2}{2\sigma^2}\right),',
 }
@@ -150,6 +152,9 @@ def keys_for(m_first, etal, second, years, idx):
     out = []
     for y in re.findall(r'\d{4}', years):
         k = idx.get((norm(m_first), y, n, sec))
+        if not k:   # two-word surnames ("Rahnama Rad"): the citation regex keeps only the last word
+            ks = [v for (f, yy, nn, ss), v in idx.items() if f.endswith(norm(m_first)) and (yy, nn, ss) == (y, n, sec)]
+            k = ks[0] if len(ks) == 1 else None
         if not k:
             raise KeyError(f'no bib entry for citation "{m_first}{" et al." if etal else ""}{" and " + second if second else ""}, {y}"')
         out.append(k)
