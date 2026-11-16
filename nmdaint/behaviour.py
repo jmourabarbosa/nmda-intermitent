@@ -13,7 +13,8 @@ per within-session SD, the others held fixed. Tests: likelihood ratio (dropping 
 fit_tau: the NMDA time constant fitted to the pooled performance against the fraction of the delay Off. Model:
 P(memory held | Off fraction) from simulations with each tau_N (memory.tau_sweep), in 10 bins of the Off
 fraction, interpolated in log tau; P(correct) = p0 x [P(held) + G x (1 - P(held))], a lost memory being a guess
-among the 8 cues (G = 1/8). Maximum likelihood over tau_N and p0; bootstrap over sessions.
+among the 8 cues (G = 1/8). Maximum likelihood over tau_N and p0; bootstrap over sessions, resampled within each
+monkey.
 """
 import numpy as np
 import pandas as pd
@@ -150,25 +151,29 @@ def held_curves(taus, held, n):
 
 
 def best_tau(k, n, Hf):
-    """Indices of the best (tau, p0) and the log-likelihood over (tau, p0), for k correct of n trials per bin."""
+    """Indices of the best (tau, p0) for k correct of n trials per bin; k, n may be stacked (resamples x NB)."""
     p = np.clip(P0[None, :, None] * (Hf + G * (1 - Hf))[:, None, :], 1e-9, 1 - 1e-9)
-    ll = (k * np.log(p) + (n - k) * np.log(1 - p)).sum(-1)
-    i, j = np.unravel_index(np.argmax(ll), ll.shape)
-    return i, j, ll
+    ll = np.tensordot(np.atleast_2d(k), np.log(p), (1, 2)) + np.tensordot(np.atleast_2d(n - k), np.log(1 - p), (1, 2))
+    best = ll.reshape(len(ll), -1).argmax(1)
+    i, j = np.unravel_index(best, ll.shape[1:])
+    return (i, j) if np.ndim(k) > 1 else (i[0], j[0])
 
 
 def fit_tau(trials, fine, Hf, seed=0):
-    """Best tau_N and p0 for all trials pooled, the bootstrap distribution of tau_N over sessions, and the data per
-    Off bin (correct k, trials n)."""
+    """Best tau_N and p0 for all trials pooled, the bootstrap distribution of tau_N (sessions resampled within each
+    monkey, so that every resample keeps each monkey's number of sessions), and the data per Off bin (correct k,
+    trials n)."""
     b, c, s = bins(trials.frac_off.values), trials.correct.values, trials.session.values
     names = np.unique(s)
     ks = np.array([np.bincount(b[s == x], weights=c[s == x], minlength=NB) for x in names])
     ns = np.array([np.bincount(b[s == x], minlength=NB) for x in names])
     k, n = ks.sum(0), ns.sum(0)
-    i, j, _ = best_tau(k, n, Hf)
+    i, j = best_tau(k, n, Hf)
+    monkey = trials.groupby('session').monkey.first()[names].values
+    groups = [np.flatnonzero(monkey == m) for m in np.unique(monkey)]
     rng = np.random.default_rng(seed)
-    boot = np.array([fine[best_tau(ks[idx].sum(0), ns[idx].sum(0), Hf)[0]]
-                     for idx in (rng.integers(0, len(names), len(names)) for _ in range(N_BOOT))])
+    idx = np.array([np.concatenate([rng.choice(g, len(g)) for g in groups]) for _ in range(N_BOOT)])
+    boot = np.concatenate([fine[best_tau(ks[ix].sum(1), ns[ix].sum(1), Hf)[0]] for ix in np.array_split(idx, 20)])   # in chunks
     return dict(tau=fine[i], p0=P0[j], held=Hf[i], boot=boot, k=k, n=n)
 
 
