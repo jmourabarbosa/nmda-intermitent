@@ -157,7 +157,9 @@ To compare our model with a short-term plasticity account, we moved the slow mem
 x_i = \bm{w_s} s_i + w_a r_i - w_I r_I + I_0\, m(t) - w_{\mathit{ff}}\, q + \mathrm{cue}_i + \bm{\sigma} \xi_i
 \end{equation*}
 
-\begin{center}s\textsubscript{i} = \ensuremath{\beta} (u\textsubscript{i}/U) r\textsubscript{i} / (1 + \ensuremath{\beta} (u\textsubscript{i}/U) r\textsubscript{i})\end{center}
+\begin{equation*}
+s_i = \frac{\beta\, (u_i/U)\, r_i}{1 + \beta\, (u_i/U)\, r_i}
+\end{equation*}
 
 \begin{equation*}
 \tau_f \frac{du_i}{dt} = -(u_i - U) + \tau_f U r_i (1 - u_i)
