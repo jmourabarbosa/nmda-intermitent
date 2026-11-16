@@ -45,12 +45,13 @@ def pca_panels(fig, planes, procrustes):
     pca_scatter(d1, planes['network'], 'Network')
     pca_scatter(d2, planes['data'], 'Data')
     letter(d1, 'd', x=-0.1, y=1.02)
-    key = d2.inset_axes([0.0, 0.7, 0.3, 0.3]); key.set_aspect('equal'); key.axis('off')
+    w = 0.05; h = w * fig.get_figwidth() / fig.get_figheight()           # square key, centred between d1 and d2
+    key = fig.add_axes([(0.825 + 0.85) / 2 - w / 2, 0.335, w, h]); key.set_aspect('equal'); key.axis('off')
     for k in range(8):
         a = np.radians(45 * k); key.plot(np.cos(a), np.sin(a), 'o', ms=2.5, color=cue_colour(45 * k))
     key.plot(0, 0, '+', color=GREY, ms=3, mew=0.5)
     key.set_xlim(-1.5, 1.5); key.set_ylim(-1.5, 1.5)
-    key.text(0, -1.6, 'Cue location', ha='center', va='top', fontsize=6, color=GREY)
+    key.text(0, 1.6, 'Cue location', ha='center', va='bottom', fontsize=6, color=GREY)
     lg = d2.inset_axes([0.72, 0.0, 0.28, 0.2]); lg.axis('off'); lg.set_xlim(0, 1); lg.set_ylim(0, 1)
     lg.plot(0.1, 0.75, 'o', ms=4.5, mfc=GREY, mec=INK, mew=0.4); lg.text(0.3, 0.75, 'On', va='center', fontsize=6.5)
     lg.plot(0.1, 0.3, 'o', ms=4.5, mfc='white', mec=GREY, mew=1.0); lg.text(0.3, 0.3, 'Off', va='center', fontsize=6.5)

@@ -19,6 +19,9 @@ def stars(p):
     return '***' if p < 0.001 else '**' if p < 0.01 else '*' if p < 0.05 else 'n.s.'
 
 
+XLIM_D = (50, 300)               # d: x axis, log-symmetric about the ~125 ms fit
+
+
 def draw(single_dip, glmm, weights, tau):
     """single_dip: {model: (dip lengths, trials, memory held)}; glmm, weights: behaviour.glmm; tau:
     behaviour.fit_tau with 'bin_ms', 'p_correct_model' and 'tau_range' (the simulated tau_N)."""
@@ -74,15 +77,16 @@ def draw(single_dip, glmm, weights, tau):
     # d: bootstrap over sessions
     lo95, hi95 = np.percentile(t['boot'], (2.5, 97.5))
     t0, t1 = t['tau_range']                                      # the simulated tau_N
+    t0, t1 = max(t0, XLIM_D[0]), min(t1, XLIM_D[1])
     dx.hist(t['boot'], bins=np.exp(np.linspace(np.log(t0), np.log(t1), 41)), color=C_FIT, alpha=0.8, lw=0)
     dx.set_xscale('log'); dx.set_xlim(t0, t1)
-    dx.set_xticks([30, 100, 300, 1000], ['30', '100', '300', '1000'])
+    dx.set_xticks([50, 100, 300], ['50', '100', '300'])
     dx.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
     for x in (lo95, hi95):
         dx.axvline(x, color=C_FIT, lw=0.6, ls=(0, (1, 1.5)))
     dx.axvline(float(t['tau']), color=INK, lw=0.6, ls=(0, (3, 2)))
     dx.set_xlabel(r'Best $\tau_N$ (ms)'); dx.set_ylabel('Bootstrap samples')
-    dx.text(0.62, 0.62, f"{float(t['tau']):.0f} ms\n95% CI\n{lo95:.0f}-{hi95:.0f}", transform=dx.transAxes, ha='left',
+    dx.text(0.05, 0.62, f"{float(t['tau']):.0f} ms\n95% CI\n{lo95:.0f}-{hi95:.0f}", transform=dx.transAxes, ha='left',
             va='center', fontsize=6.5)
     letter(dx, 'd')
     return fig
