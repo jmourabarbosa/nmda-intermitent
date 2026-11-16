@@ -35,8 +35,8 @@ EQUATIONS = {
     'Cm dV/dt = −gL (V − EL) − Iext − INMDA − IGABA + Icue,':
         r'C_m \frac{dV}{dt} = -g_L (V - E_L) - I_\mathrm{ext} - I_\mathrm{NMDA} - I_\mathrm{GABA} + I_\mathrm{cue},',
     'Iext = gext sAMPA (V − EE),   INMDA = gNMDA B(V) (V − EE) Σj Wij sNMDA,j,   IGABA = gGABA (V − EI) Σj sGABA,j,':
-        r'I_\mathrm{ext} = g_\mathrm{ext}\, s_\mathrm{AMPA} (V - E_E), \quad I_\mathrm{NMDA} = g_\mathrm{NMDA}\, B(V) (V - E_E) '
-        r'\textstyle\sum_j W_{ij}\, s_{\mathrm{NMDA},j}, \quad I_\mathrm{GABA} = g_\mathrm{GABA} (V - E_I) \textstyle\sum_j s_{\mathrm{GABA},j},',
+        r'\begin{gathered} I_\mathrm{ext} = g_\mathrm{ext}\, s_\mathrm{AMPA} (V - E_E), \\ I_\mathrm{NMDA} = g_\mathrm{NMDA}\, B(V) (V - E_E) '
+        r'\textstyle\sum_j W_{ij}\, s_{\mathrm{NMDA},j}, \\ I_\mathrm{GABA} = g_\mathrm{GABA} (V - E_I) \textstyle\sum_j s_{\mathrm{GABA},j}, \end{gathered}',
     'dx/dt = −x/τx + Σk δ(t − tk),   dsNMDA/dt = −sNMDA/τNMDA + α x (1 − sNMDA),':
         r'\frac{dx}{dt} = -\frac{x}{\tau_x} + \sum_k \delta(t - t_k), \qquad \frac{ds_\mathrm{NMDA}}{dt} = '
         r'-\frac{s_\mathrm{NMDA}}{\tau_\mathrm{NMDA}} + \alpha\, x (1 - s_\mathrm{NMDA}),',
@@ -281,8 +281,22 @@ def convert(doc, out_dir, bib, exclude=(), name='main'):
             cap = re.sub(r'^\\textbf\{(Supplementary )?Figure \d+\.\s*', r'\\textbf{', p['tex'])
             cap = re.sub(r'^(Supplementary )?Figure \d+\.\s*', '', cap)
             cap = figrefs(bold_panels(cite(cap, idx, used)))
+            lab = 'fig:%s%s' % ('S' if m.group(1) else '', m.group(2))
+            part2 = None
+            from PIL import Image
+            w, h = Image.open(os.path.join(out_dir, pending_img)).size
+            fits = lambda c: 16 * h / w + 0.42 * len(re.sub(r'\\[a-zA-Z]+\{|\}|\\[a-zA-Z]+', '', c)) / 115 + 1.2 <= 23.5
+            if not fits(cap):          # caption too long for the page: continue it on the next page, at a panel boundary
+                cuts = [mm.start() for mm in re.finditer(r'\\textbf\{[a-l](?:[,–-]\s?[a-l])*\},', cap)]
+                ok = [c for c in cuts if fits(cap[:c])]
+                if ok:
+                    cap, part2 = cap[:ok[-1]].rstrip(), cap[ok[-1]:]
+                else:
+                    warnings.append('caption too long for one page and no panel boundary to split at: ' + lab)
             out.append('\\begin{figure}[%s]\n\\centering\n\\includegraphics[width=\\textwidth]{%s}\n\\caption{%s}\\label{fig:%s%s}\n\\end{figure}\n'
-                       % ('p' if m.group(1) else 'tbp', pending_img, cap, 'S' if m.group(1) else '', m.group(2)))
+                       % ('p' if m.group(1) or part2 else 'tbp', pending_img, cap, 'S' if m.group(1) else '', m.group(2)))
+            if part2:
+                out.append('\\begin{figure}[p]\n\\ContinuedFloat\n\\caption[]{\\textit{(continued)} %s}\n\\end{figure}\n' % part2)
             pending_img = None
             continue
         if p['align'] == 'CENTER' and section != '':
