@@ -13,7 +13,7 @@ from . import onoff, ratemodel, readout
 
 LENGTHS = np.arange(0, 1001, 25)
 ONSET, N_DIP = 500.0, 300
-TAUS = (20, 30, 40, 50, 60, 80, 100, 120, 150, 200, 250, 300, 400, 500, 750, 1000, 1500)
+TAUS = (20, 30, 40, 50, 60, 80, 100, 120, 150, 200, 250, 300, 400, 500, 750)   # ms; slower traces are not loaded by the 50 ms cue
 N_SWEEP, BATCH = 30000, 1000
 
 

@@ -35,19 +35,14 @@ B2. **"With depression, On states were too short (112 vs 172 ms in the data)"** 
 Analyses that differ from the original on purpose: the share rho of the read-out noise is measured for each decoded
 population (the original used the 20-unit values for the 5- and 50-unit populations), the mixed model of errors
 (Fig. 3b) has other predictors, the tau sweep uses the gain of the
-other figures (0.0512 instead of its own calibration, 0.0487; tau_N 125 instead of 123 ms) and its bootstrap resamples
-sessions within each monkey (10,000 resamples), and Fig. 2 plots the
+other figures (0.0512 instead of its own calibration, 0.0487; tau_N 125 instead of 123 ms), stops at 750 ms (the
+model does not load the memory with slower traces) and its bootstrap resamples sessions within each monkey
+(10,000 resamples), and Fig. 2 plots the
 statistics against decoding strength.
 
-## D. Open problem from the audit of 16 November
+## D. Stated in the Methods instead of fixed
 
-D1. **The tau sweep extends into a range where the model cannot load the memory.** With tau_N of 1,000 ms and above
-   the 50 ms cue no longer charges the gating: the memory is held in 97% (1,000 ms) and 63% (1,500 ms) of trials
-   whatever the time Off. The few bootstrap resamples at about 1,000 ms sit in that range. Tested in scratch code,
-   not applied: fitting only tau_N <= 750 ms gives 125 ms, 95% interval 112-148 (112-158 now), with 0.03% of
-   resamples above 250 ms (1.4% now).
-
-Stated in the Methods instead of fixed: the gain calibration leaves the model's decoding strength 1-5% below the
+The gain calibration leaves the model's decoding strength 1-5% below the
 data's (`readout.gain_curve`: running maximum over 10 gains), and the fit loss varies between simulation seeds
 (NMDA 9.9 +- 0.3, STP 9.7 +- 0.3 on all neurons; 73 +- 2 and 79 +- 2 summed over the populations; 10 seeds), with
 some fitted parameters on their search bounds.

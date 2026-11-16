@@ -1,4 +1,4 @@
-"""Memory held against time Off for each NMDA time constant (Fig. 3c, d): 17 tau_N x 30,000 trials of the fitted
+"""Memory held against time Off for each NMDA time constant (Fig. 3c, d): 15 tau_N x 30,000 trials of the fitted
 model with its own dips, read out like the data (memory.tau_sweep); about 8 min on 4 cores. Needs
 results/recordings/. Writes results/ratemodel/tau_sweep.csv (trials and memory held per bin of the fraction of the
 delay Off).
