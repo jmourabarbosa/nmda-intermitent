@@ -4,7 +4,7 @@ single_dip: every trial has one dip of the common input (fitted depth, no other 
 (0-1,000 ms in 25 ms steps) starting 500 ms after cue onset; memory held at the end of the delay (no read-out).
 
 tau_sweep: the fitted NMDA model with its own random dips and only tau_N changed, read out like the data with the
-all-units gain of the fitted model (fixed, not recalibrated): per trial, the fraction of the delay Off and whether
+all-units gain of the fitted model (readout.reference; fixed, not recalibrated): per trial, the fraction of the delay Off and whether
 the memory was held. Input of behaviour.fit_tau.
 """
 import numpy as np
@@ -21,12 +21,6 @@ def single_dip(p, lengths=LENGTHS, n=N_DIP, onset=ONSET):
     """Number of trials holding the memory, for each dip length (ms; n trials each, the dip from `onset` ms)."""
     return np.array([ratemodel.memory_correct(ratemodel.simulate(p, n, seed=50000 + i, m=ratemodel.single_dip(p, n, onset, L))).sum()
                      for i, L in enumerate(lengths)])
-
-
-def sweep_gain(p, ses):
-    """All-units read-out gain for the tau sweep, calibrated on its own simulation (1,056 trials, seed 0), as for the
-    paper's Fig. 3 (BUGS.md, A1: the other figures use readout.reference, 0.0512 instead of 0.0487)."""
-    return readout.evaluate(p, ses, n_trials=1056, seed=0, sets=('all',))['sets']['all']['gain']
 
 
 def tau_sweep(p, tau, gain, n_trials=N_SWEEP):

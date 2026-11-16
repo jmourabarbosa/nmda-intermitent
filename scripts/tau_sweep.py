@@ -1,5 +1,5 @@
 """Memory held against time Off for each NMDA time constant (Fig. 3c, d): 17 tau_N x 30,000 trials of the fitted
-model with its own dips, read out like the data (memory.tau_sweep); about 20 min on 4 cores. Needs
+model with its own dips, read out like the data (memory.tau_sweep); about 8 min on 4 cores. Needs
 results/recordings/. Writes results/ratemodel/tau_sweep.csv (trials and memory held per bin of the fraction of the
 delay Off).
 
@@ -14,7 +14,7 @@ from nmdaint import behaviour, memory, paths, ratemodel, readout
 def main():
     ses, _ = readout.load_data()
     p = ratemodel.params('nmda')
-    gain = memory.sweep_gain(p, ses)
+    gain = readout.reference(p, ses)['sets']['all']['gain']
     sweep = Parallel(n_jobs=4)(delayed(memory.tau_sweep)(p, tau, gain) for tau in memory.TAUS)
     rows = []
     for tau, (frac, held) in zip(memory.TAUS, sweep):

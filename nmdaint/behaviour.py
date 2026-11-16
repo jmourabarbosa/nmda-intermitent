@@ -135,7 +135,7 @@ EDGES = np.r_[np.arange(0, 1.0, 0.1), 1.0001]     # bins of the fraction of the 
 NB = len(EDGES) - 1
 P0 = np.linspace(0.3, 1.0, 701)
 G = 1 / 8
-N_BOOT = 1000
+N_BOOT = 10000
 
 
 def bins(frac):
