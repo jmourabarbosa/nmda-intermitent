@@ -66,16 +66,17 @@ PREAMBLE = r"""%% Generated from the Google Doc by doc_to_latex.py -- do not edi
 unknown, warnings = set(), []
 
 
-def esc(s):
+def esc(s, bold=False):
+    B = (lambda x: r'\bm{%s}' % x) if bold else (lambda x: x)   # \textbf does not reach math
     out, i = [], 0
     while i < len(s):
         ch = s[i]
         if i + 1 < len(s) and s[i + 1] == '\u0304':
-            out.append(r'\ensuremath{\bar{%s}}' % ch); i += 2; continue
+            out.append(r'\ensuremath{%s}' % B(r'\bar{%s}' % ch)); i += 2; continue
         if ch in ESC:
             out.append(ESC[ch])
         elif ch in GREEK:
-            out.append(r'\ensuremath{\%s}' % GREEK[ch])
+            out.append(r'\ensuremath{%s}' % B('\\' + GREEK[ch]))
         elif ch in MATH:
             out.append(r'\ensuremath{%s}' % MATH[ch])
         elif ch in SUP:
@@ -91,7 +92,7 @@ def esc(s):
 
 
 def run_tex(text, st):
-    t = esc(text)
+    t = esc(text, bold=bool(st.get('bold')))
     if not t.strip():
         return t
     if st.get('baselineOffset') == 'SUBSCRIPT':
